@@ -1,19 +1,19 @@
-import Example from '@/components/Example'
 import { Routes } from '@/models/types'
-import Home from '@/pages/Home'
+import { Home } from '@/pages/Home'
+import { NoteEditorPage } from '@/pages/NoteEditorPage'
 
 export const routers: Routes[] = [
   {
     href: '/',
     id: 'home',
-    name: 'Home',
+    name: 'Notes Home',
     element: <Home />,
   },
   {
-    href: '/example',
-    id: 'example',
-    name: 'Example',
-    element: <Example />,
+    href: '/note/:noteId',
+    id: 'note-editor',
+    name: 'Note Editor',
+    element: <NoteEditorPage />,
   },
 
   // Add other routes as needed
