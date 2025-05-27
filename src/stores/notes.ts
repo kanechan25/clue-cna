@@ -6,7 +6,7 @@ import { NotesStore, Note, User, EditOperation, Conflict } from '@/models/notes'
 import { createMockNotes, MOCK_USERS } from '@/models/mockData'
 
 const STORAGE_KEY = 'collaborative-notes-data'
-const OPERATIONS_CLEANUP_INTERVAL = 60 * 1000
+const OPERATIONS_CLEANUP_INTERVAL = 60 * 1000 * 2
 const MAX_OPERATIONS_HISTORY = 100
 
 export const defaultInitState: NotesStore = {
