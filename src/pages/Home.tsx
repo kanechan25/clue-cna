@@ -1,9 +1,9 @@
-import ItemList from '@/components/NestedRerender/ItemList'
+import { Counter } from '@/components/Counter'
 
 export default function Home() {
   return (
     <div className='space-y-8'>
-      <ItemList />
+      <Counter />
     </div>
   )
 }
