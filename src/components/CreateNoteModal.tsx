@@ -1,7 +1,8 @@
 import React, { useCallback, useState } from 'react'
-import { Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
+import { Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Box } from '@mui/material'
+import TiptapEditor from './TiptapEditor'
 
-const CreateNoteDialog = React.memo<{
+const CreateNoteModal = React.memo<{
   open: boolean
   onClose: () => void
   onSubmit: (title: string, content: string) => void
@@ -9,9 +10,13 @@ const CreateNoteDialog = React.memo<{
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
 
+  const handleContentChange = useCallback((html: string) => {
+    setContent(html)
+  }, [])
+
   const handleSubmit = useCallback(() => {
     if (title.trim()) {
-      onSubmit(title.trim(), content.trim())
+      onSubmit(title.trim(), content)
       setTitle('')
       setContent('')
       onClose()
@@ -25,7 +30,7 @@ const CreateNoteDialog = React.memo<{
   }, [onClose])
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth='md' fullWidth>
       <DialogTitle>Create New Note</DialogTitle>
       <DialogContent>
         <TextField
@@ -36,21 +41,22 @@ const CreateNoteDialog = React.memo<{
           variant='outlined'
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          sx={{ mb: 2 }}
+          sx={{ mb: 2, bgcolor: '#1e1e1e', borderRadius: 1 }}
         />
-        <TextField
-          margin='dense'
-          label='Content (optional)'
-          fullWidth
-          multiline
-          rows={4}
-          variant='outlined'
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
+        <Box>
+          <label className='text-sm font-medium'>Note Content</label>
+          <TiptapEditor
+            content={content}
+            onUpdate={handleContentChange}
+            placeholder='Start writing your note...'
+            minHeight={200}
+          />
+        </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleClose} variant='contained'>
+          Cancel
+        </Button>
         <Button onClick={handleSubmit} variant='contained' disabled={!title.trim()}>
           Create
         </Button>
@@ -59,5 +65,5 @@ const CreateNoteDialog = React.memo<{
   )
 })
 
-CreateNoteDialog.displayName = 'CreateNoteDialog'
-export default CreateNoteDialog
+CreateNoteModal.displayName = 'CreateNoteModal'
+export default CreateNoteModal

@@ -14,6 +14,13 @@ import { Note } from '@/models/notes'
 
 dayjs.extend(relativeTime)
 
+// Utility function to convert HTML to plain text for preview
+const htmlToPlainText = (html: string): string => {
+  const tempDiv = document.createElement('div')
+  tempDiv.innerHTML = html
+  return tempDiv.textContent || tempDiv.innerText || ''
+}
+
 const NoteCard = React.memo<{
   note: Note
   onEdit: (note: Note) => void
@@ -54,11 +61,11 @@ const NoteCard = React.memo<{
     [users, note.collaborators],
   )
 
-  // Preview content (first 150 characters)
-  const previewContent = useMemo(
-    () => (note.content.length > 150 ? `${note.content.slice(0, 150)}...` : note.content),
-    [note.content],
-  )
+  // Preview content (first 150 characters) - convert HTML to plain text
+  const previewContent = useMemo(() => {
+    const plainText = htmlToPlainText(note.content)
+    return plainText.length > 150 ? `${plainText.slice(0, 150)}...` : plainText
+  }, [note.content])
 
   return (
     <Card

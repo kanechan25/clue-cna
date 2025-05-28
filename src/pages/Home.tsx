@@ -6,7 +6,7 @@ import dayjs from 'dayjs'
 import { useNotesStore } from '@/provider/notesProvider'
 import { Note } from '@/models/notes'
 import NoteCard from '@/components/NoteCard'
-import CreateNoteDialog from '@/components/CreateNoteModal'
+import CreateNoteModal from '@/components/CreateNoteModal'
 import Header from '@/components/Header'
 
 export const Home: React.FC = () => {
@@ -176,7 +176,7 @@ export const Home: React.FC = () => {
           <AddIcon />
         </Fab>
 
-        <CreateNoteDialog
+        <CreateNoteModal
           open={createDialogOpen}
           onClose={() => setCreateDialogOpen(false)}
           onSubmit={handleCreateNote}

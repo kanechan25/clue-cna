@@ -5,9 +5,9 @@ import { toast } from 'react-toastify'
 import { NotesStore, Note, User, EditOperation, Conflict } from '@/models/notes'
 import { createMockNotes, MOCK_USERS } from '@/models/mockData'
 
-const STORAGE_KEY = 'collaborative-notes-data'
-const OPERATIONS_CLEANUP_INTERVAL = 60 * 1000 * 2
-const MAX_OPERATIONS_HISTORY = 100
+const STORAGE_KEY = 'collaborative-notes-app'
+const CLEANUP_INTERVAL = 60 * 1000 * 2
+const MAX_HISTORY = 100
 
 export const defaultInitState: NotesStore = {
   notes: [],
@@ -139,7 +139,7 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
         }
 
         set((state) => ({
-          editOperations: [newOperation, ...state.editOperations.slice(0, MAX_OPERATIONS_HISTORY - 1)],
+          editOperations: [newOperation, ...state.editOperations.slice(0, MAX_HISTORY - 1)],
         }))
 
         // Check for conflicts
@@ -328,4 +328,4 @@ export const notesStore = createNotesStore()
 // Setup periodic cleanup
 setInterval(() => {
   notesStore.getState().clearOldOperations()
-}, OPERATIONS_CLEANUP_INTERVAL)
+}, CLEANUP_INTERVAL)
