@@ -69,7 +69,7 @@ const NoteCard = React.memo<{
         cursor: 'pointer',
         transition: 'all 0.2s ease-in-out',
         '&:hover': {
-          transform: 'translateY(-2px)',
+          transform: 'scale(1.05)',
           boxShadow: 4,
         },
       }}

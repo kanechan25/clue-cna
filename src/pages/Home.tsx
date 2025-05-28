@@ -113,14 +113,14 @@ export const Home: React.FC = () => {
             {notesStats.recentNotes > 0 && `, ${notesStats.recentNotes} updated this week`}.
           </Typography>
         </Box>
-        {notes.length === 0 ? (
+        {notes?.length === 0 ? (
           <Box textAlign='center' py={8}>
             {searchQuery ? (
               <Alert severity='info' sx={{ maxWidth: 400, mx: 'auto' }}>
                 No notes found matching "{searchQuery}". Try a different search term.
               </Alert>
             ) : (
-              <>
+              <div className='flex flex-row justify-center items-center gap-2'>
                 <Typography variant='h5' gutterBottom color='text.secondary'>
                   No notes yet
                 </Typography>
@@ -135,7 +135,7 @@ export const Home: React.FC = () => {
                 >
                   Create Your First Note
                 </Button>
-              </>
+              </div>
             )}
           </Box>
         ) : (
@@ -150,7 +150,7 @@ export const Home: React.FC = () => {
               gap: 3,
             }}
           >
-            {notes.map((note) => (
+            {notes?.map((note) => (
               <NoteCard
                 key={note.id}
                 note={note}

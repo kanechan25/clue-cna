@@ -50,7 +50,7 @@ A modern, real-time collaborative note-taking application built with React, Type
 1. **Clone the repository**
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/kanechan25/clue-cna.git
 cd clue-cna
 ```
 
@@ -176,12 +176,10 @@ src/
 
 ### Customizing Mock Data
 
-Edit `src/stores/notes.ts` to modify:
+Edit `src/model/mockData.ts` to modify:
 
 - Initial notes content
 - Mock users and colors
-- Cleanup intervals
-- Operation history limits
 
 ## 🧪 Testing
 

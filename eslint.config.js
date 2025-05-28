@@ -7,12 +7,12 @@ import prettierPlugin from 'eslint-plugin-prettier'
 import prettierConfig from 'eslint-config-prettier'
 
 export default tseslint.config(
-  { ignores: ['dist', "node_modules", 'build', 'coverage'] },
+  { ignores: ['dist', 'node_modules', 'build', 'coverage'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended, prettierConfig],
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
-      ecmaVersion: "latest",
+      ecmaVersion: 'latest',
       globals: {
         ...globals.browser,
         ...globals.node,
@@ -35,7 +35,7 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 )
