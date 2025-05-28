@@ -11,14 +11,25 @@ import {
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Note } from '@/models/notes'
+import RenderNote from './RenderNote'
 
 dayjs.extend(relativeTime)
 
-// Utility function to convert HTML to plain text for preview
-const htmlToPlainText = (html: string): string => {
+// just preview 150 characters of HTML content
+const truncateHtmlContent = (html: string, maxLength: number = 150): string => {
   const tempDiv = document.createElement('div')
   tempDiv.innerHTML = html
-  return tempDiv.textContent || tempDiv.innerText || ''
+  const textContent = tempDiv.textContent || tempDiv.innerText || ''
+
+  if (textContent.length <= maxLength) {
+    return html
+  }
+
+  const truncatedText = textContent.slice(0, maxLength)
+  const lastSpaceIndex = truncatedText.lastIndexOf(' ')
+  const finalLength = lastSpaceIndex > 0 ? lastSpaceIndex : maxLength
+
+  return textContent.slice(0, finalLength) + '...'
 }
 
 const NoteCard = React.memo<{
@@ -55,17 +66,16 @@ const NoteCard = React.memo<{
     handleMenuClose()
   }, [note.id, onDuplicate, handleMenuClose])
 
-  // Get collaborators for this note
   const collaborators = useMemo(
     () => users.filter((user) => note.collaborators.includes(user.id)),
     [users, note.collaborators],
   )
 
-  // Preview content (first 150 characters) - convert HTML to plain text
   const previewContent = useMemo(() => {
-    const plainText = htmlToPlainText(note.content)
-    return plainText.length > 150 ? `${plainText.slice(0, 150)}...` : plainText
+    return truncateHtmlContent(note.content, 150)
   }, [note.content])
+
+  const isHtmlContent = note.content.includes('<') && note.content.includes('>')
 
   return (
     <Card
@@ -105,21 +115,25 @@ const NoteCard = React.memo<{
           </IconButton>
         </Box>
 
-        <Typography
-          variant='body2'
-          color='text.secondary'
-          sx={{
-            mb: 2,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
-            lineHeight: 1.5,
-          }}
-        >
-          {previewContent}
-        </Typography>
+        {isHtmlContent ? (
+          <RenderNote previewContent={previewContent} />
+        ) : (
+          <Typography
+            variant='body2'
+            color='text.secondary'
+            sx={{
+              mb: 2,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              lineHeight: 1.5,
+            }}
+          >
+            {previewContent}
+          </Typography>
+        )}
 
         <Box display='flex' alignItems='center' gap={1} mb={1}>
           <ScheduleIcon fontSize='small' color='action' />

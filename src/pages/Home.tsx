@@ -120,7 +120,7 @@ export const Home: React.FC = () => {
                 No notes found matching "{searchQuery}". Try a different search term.
               </Alert>
             ) : (
-              <div className='flex flex-row justify-center items-center gap-2'>
+              <div className='flex flex-col justify-center items-center gap-2'>
                 <Typography variant='h5' gutterBottom color='text.secondary'>
                   No notes yet
                 </Typography>

@@ -166,11 +166,22 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
           },
           '& .ProseMirror ul': {
             listStyleType: 'disc',
+            listStylePosition: 'outside',
             paddingLeft: '1.5rem',
+            margin: '0.5rem 0',
           },
           '& .ProseMirror ol': {
             listStyleType: 'decimal',
+            listStylePosition: 'outside',
             paddingLeft: '1.5rem',
+            margin: '0.5rem 0',
+          },
+          '& .ProseMirror li': {
+            display: 'list-item',
+            marginBottom: '0.25rem',
+          },
+          '& .ProseMirror li p': {
+            margin: '0.25rem 0',
           },
           '& .ProseMirror p': {
             margin: '0.5rem 0',
