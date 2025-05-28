@@ -29,7 +29,6 @@ import { useNotesStore } from '@/provider/notesProvider'
 import ConflictModal from '@/components/ConflictModal'
 import CollaborativeEditor from '@/components/CollaborativeEditor'
 
-// Main Note Editor Page
 export const NoteEditorPage: React.FC = () => {
   const navigate = useNavigate()
   const { noteId } = useParams<{ noteId: string }>()
@@ -40,11 +39,21 @@ export const NoteEditorPage: React.FC = () => {
   const [showConflicts, setShowConflicts] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved')
 
-  // Store selectors
-  const currentNote = useNotesStore((state) => state.notes.find((note) => note.id === noteId) || state.currentNote)
+  // Store selectors - Fixed to prevent infinite loops
+  const notes = useNotesStore((state) => state.notes)
+  const storedCurrentNote = useNotesStore((state) => state.currentNote)
   const users = useNotesStore((state) => state.users)
   const currentUser = useNotesStore((state) => state.currentUser)
-  const conflicts = useNotesStore((state) => state.conflicts.filter((c) => c.noteId === noteId && !c.resolvedAt))
+  const allConflicts = useNotesStore((state) => state.conflicts)
+
+  // Memoized derived values
+  const currentNote = useMemo(() => {
+    return notes.find((note) => note.id === noteId) || storedCurrentNote
+  }, [notes, noteId, storedCurrentNote])
+
+  const conflicts = useMemo(() => {
+    return allConflicts.filter((c) => c.noteId === noteId && !c.resolvedAt)
+  }, [allConflicts, noteId])
 
   // Store actions
   const updateNote = useNotesStore((state) => state.updateNote)

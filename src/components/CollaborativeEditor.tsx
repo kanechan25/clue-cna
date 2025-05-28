@@ -13,18 +13,16 @@ const CollaborativeEditor = React.memo<{
   const [content, setContent] = useState(note.content)
   const [lastSaved, setLastSaved] = useState(Date.now())
 
-  // Update content when note changes
   useEffect(() => {
     setContent(note.content)
   }, [note.content])
 
-  // Auto-save functionality
   useEffect(() => {
+    if (content === note.content) return // Don't save if content hasn't actually changed
+
     const timer = setTimeout(() => {
-      if (content !== note.content) {
-        onContentChange(content)
-        setLastSaved(Date.now())
-      }
+      onContentChange(content)
+      setLastSaved(Date.now())
     }, 1000) // Auto-save after 1 second of inactivity
 
     return () => clearTimeout(timer)
@@ -46,12 +44,11 @@ const CollaborativeEditor = React.memo<{
   }, [collaborators, content, note.lastEditedBy, onContentChange])
 
   return (
-    <Box>
-      {/* Header with collaborator info and actions */}
+    <div className='flex flex-col gap-2'>
       <Box display='flex' justifyContent='space-between' alignItems='center' mb={2} sx={{ flexWrap: 'wrap', gap: 1 }}>
         <Box display='flex' alignItems='center' gap={1}>
           <Typography variant='caption' color='text.secondary'>
-            Last saved: {dayjs(lastSaved).format('HH:mm:ss')}
+            Last saved: {dayjs(lastSaved).format('DD/MM/YYYY HH:mm:ss')}
           </Typography>
         </Box>
 
@@ -62,7 +59,6 @@ const CollaborativeEditor = React.memo<{
         </Box>
       </Box>
 
-      {/* Main Tiptap Editor */}
       <TiptapEditor
         content={content}
         onUpdate={handleContentChange}
@@ -71,7 +67,6 @@ const CollaborativeEditor = React.memo<{
         editable={true}
       />
 
-      {/* Active Collaborators */}
       {collaborators.length > 0 && (
         <Box display='flex' alignItems='center' gap={1} mt={2}>
           <Typography variant='body2' color='text.secondary'>
@@ -94,7 +89,7 @@ const CollaborativeEditor = React.memo<{
           ))}
         </Box>
       )}
-    </Box>
+    </div>
   )
 })
 

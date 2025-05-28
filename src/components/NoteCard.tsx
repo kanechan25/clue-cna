@@ -72,6 +72,7 @@ const NoteCard = React.memo<{
   )
 
   const previewContent = useMemo(() => {
+    console.log('note.content', note.content)
     return truncateHtmlContent(note.content, 150)
   }, [note.content])
 

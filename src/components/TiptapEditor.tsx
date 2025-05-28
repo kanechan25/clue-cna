@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -44,7 +44,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
       }),
       Underline,
     ],
-    content,
+    content: '', // Initialize with empty content to prevent loops
     editable,
     onUpdate: ({ editor }) => {
       const html = editor.getHTML()
@@ -58,6 +58,13 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
       },
     },
   })
+
+  // Update editor content when content prop changes, but prevent loops
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content, false) // false = don't trigger onUpdate
+    }
+  }, [editor, content])
 
   const toggleBold = useCallback(() => {
     editor?.chain().focus().toggleBold().run()
