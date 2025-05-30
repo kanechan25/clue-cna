@@ -15,8 +15,9 @@ import RenderNote from './RenderNote'
 
 dayjs.extend(relativeTime)
 
-// just preview 150 characters of HTML content
-const truncateHtmlContent = (html: string, maxLength: number = 150): string => {
+const MAX_PREVIEW_LENGTH = 250
+// just preview MAX_PREVIEW_LENGTH characters of HTML content
+const truncateHtmlContent = (html: string, maxLength: number = MAX_PREVIEW_LENGTH): string => {
   const tempDiv = document.createElement('div')
   tempDiv.innerHTML = html
   const textContent = tempDiv.textContent || tempDiv.innerText || ''
@@ -72,8 +73,7 @@ const NoteCard = React.memo<{
   )
 
   const previewContent = useMemo(() => {
-    console.log('note.content', note.content)
-    return truncateHtmlContent(note.content, 150)
+    return truncateHtmlContent(note.content, MAX_PREVIEW_LENGTH)
   }, [note.content])
 
   const isHtmlContent = note.content.includes('<') && note.content.includes('>')
@@ -139,7 +139,7 @@ const NoteCard = React.memo<{
         <Box display='flex' alignItems='center' gap={1} mb={1}>
           <ScheduleIcon fontSize='small' color='action' />
           <Typography variant='caption' color='text.secondary'>
-            {dayjs(note.updatedAt).fromNow()}
+            {dayjs(note.createdAt).format('DD/MM/YYYY HH:mm:ss')}
           </Typography>
         </Box>
 

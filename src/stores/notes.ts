@@ -3,11 +3,11 @@ import { subscribeWithSelector } from 'zustand/middleware'
 import dayjs from 'dayjs'
 import { toast } from 'react-toastify'
 import { NotesStore, Note, User, EditOperation, Conflict } from '@/models/notes'
-import { createMockNotes, MOCK_USERS } from '@/models/mockData'
+import { createMockNotes, MOCK_USERS } from '@/constants/mockData'
 
 const STORAGE_KEY = 'collaborative-notes-app'
 const CLEANUP_INTERVAL = 60 * 1000 * 2
-const MAX_HISTORY = 100
+const MAX_HISTORY = 1000
 
 export const defaultInitState: NotesStore = {
   notes: [],
@@ -23,10 +23,11 @@ export const defaultInitState: NotesStore = {
   deleteNote: () => {},
   setCurrentNote: () => {},
   duplicateNote: () => {},
-  addEditOperation: () => {},
+  addEditOperation: () => ({}) as EditOperation,
   checkForConflicts: () => {},
   resolveConflict: () => {},
   simulateCollaboratorEdit: () => {},
+  simulateMultipleEdits: () => {},
   setCurrentUser: () => {},
   addCollaborator: () => {},
   removeCollaborator: () => {},
@@ -131,7 +132,7 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
       },
 
       // Real-time collaboration
-      addEditOperation: (operation: Omit<EditOperation, 'id' | 'timestamp'>) => {
+      addEditOperation: (operation: Omit<EditOperation, 'id' | 'timestamp'>, skipConflictCheck?: boolean) => {
         const newOperation: EditOperation = {
           ...operation,
           id: `op-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -142,8 +143,12 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
           editOperations: [newOperation, ...state.editOperations.slice(0, MAX_HISTORY - 1)],
         }))
 
-        // Check for conflicts
-        setTimeout(() => get().checkForConflicts(newOperation), 0)
+        // Only check for conflicts if not skipped
+        if (!skipConflictCheck) {
+          setTimeout(() => get().checkForConflicts(newOperation), 0)
+        }
+
+        return newOperation
       },
 
       checkForConflicts: (newOperation: EditOperation) => {
@@ -155,22 +160,40 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
         )
 
         if (recentOperations.length > 0) {
-          const conflict: Conflict = {
-            id: `conflict-${Date.now()}`,
-            noteId: newOperation.noteId,
-            operations: [newOperation, ...recentOperations],
+          // Check if there's already a conflict for this note that includes these operations
+          const existingConflict = get().conflicts.find(
+            (conflict) =>
+              conflict.noteId === newOperation.noteId &&
+              !conflict.resolvedAt &&
+              conflict.operations.some((op) => op.userId === newOperation.userId),
+          )
+
+          if (existingConflict) {
+            // Add to existing conflict
+            set((state) => ({
+              conflicts: state.conflicts.map((conflict) =>
+                conflict.id === existingConflict.id
+                  ? { ...conflict, operations: [...conflict.operations, newOperation] }
+                  : conflict,
+              ),
+            }))
+          } else {
+            // Create new conflict with all related operations
+            const allRelatedOperations = [newOperation, ...recentOperations]
+            const conflict: Conflict = {
+              id: `conflict-${Date.now()}`,
+              noteId: newOperation.noteId,
+              operations: allRelatedOperations,
+            }
+
+            set((state) => ({
+              conflicts: [conflict, ...state.conflicts],
+            }))
+
+            toast.warn('Editing conflict detected!', {
+              position: 'top-right',
+            })
           }
-
-          set((state) => ({
-            conflicts: [conflict, ...state.conflicts],
-          }))
-
-          toast.warn('Editing conflict detected! Auto-resolving...', {
-            position: 'top-right',
-          })
-
-          // Auto-resolve conflict after 2 seconds (latest wins strategy)
-          setTimeout(() => get().resolveConflict(conflict.id, 'latest-wins'), 2000)
         }
       },
 
@@ -179,14 +202,9 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
           const conflict = state.conflicts.find((c) => c.id === conflictId)
           if (!conflict) return state
 
-          const resolvedConflict = {
-            ...conflict,
-            resolvedAt: new Date().toISOString(),
-            resolution,
-          }
-
+          // Mark conflict as resolved and remove it from active conflicts
           return {
-            conflicts: state.conflicts.map((c) => (c.id === conflictId ? resolvedConflict : c)),
+            conflicts: state.conflicts.filter((c) => c.id !== conflictId),
           }
         })
 
@@ -194,10 +212,17 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
       },
 
       simulateCollaboratorEdit: (noteId: string, content: string) => {
-        const randomUser = MOCK_USERS[Math.floor(Math.random() * MOCK_USERS.length)]
-        const currentUser = get().currentUser
+        const availableUsers = MOCK_USERS.filter((user) => user.id !== get().currentUser?.id)
+        const randomUser = availableUsers[Math.floor(Math.random() * availableUsers.length)]
 
-        if (randomUser.id === currentUser?.id) return
+        if (!randomUser) return
+
+        // Extract just the new comment text that was added
+        const currentNote = get().notes.find((n) => n.id === noteId)
+        if (!currentNote) return
+
+        // Find the new content that was added (the edit comment)
+        const newContentAdded = content.replace(currentNote.content, '').trim()
 
         get().updateNote(noteId, { content })
 
@@ -206,7 +231,7 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
           userId: randomUser.id,
           operation: 'insert',
           position: content.length,
-          content: content.slice(-10),
+          content: newContentAdded || content.slice(-100), // Store the actual edit content
           version: get().notes.find((n) => n.id === noteId)?.version || 1,
         })
 
@@ -214,6 +239,66 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
           position: 'bottom-left',
           autoClose: 3000,
         })
+      },
+
+      simulateMultipleEdits: (noteId: string, baseContent: string) => {
+        const availableUsers = MOCK_USERS.filter((user) => user.id !== get().currentUser?.id)
+        if (availableUsers.length === 0) return
+
+        // Create 3 different edit operations from different users
+        const numberOfEdits = 3
+        const allOperations: EditOperation[] = []
+        let finalContent = baseContent
+
+        for (let i = 0; i < numberOfEdits; i++) {
+          setTimeout(() => {
+            const randomUser = availableUsers[i % availableUsers.length]
+            const randomText = [
+              'Maybe we should consider...',
+              'Interesting idea! 💡',
+              'Can we expand on this section?',
+              'Let me add my perspective on this.',
+              'I have some concerns about this.',
+            ][i % 5]
+
+            const timestamp = dayjs().format('DD/MM/YYYY HH:mm:ss')
+            const editComment = `<p><em>[${randomUser.name} edited this note at ${timestamp}]: ${randomText}</em></p>`
+
+            // Create individual edit operation for each user (skip conflict check for now)
+            const operation = get().addEditOperation(
+              {
+                noteId,
+                userId: randomUser.id,
+                operation: 'insert',
+                position: baseContent.length + i * 100,
+                content: editComment,
+                version: get().notes.find((n) => n.id === noteId)?.version || 1,
+              },
+              true,
+            ) // Skip immediate conflict check
+
+            allOperations.push(operation)
+
+            // Update note content with all edits accumulated
+            finalContent += editComment
+            get().updateNote(noteId, {
+              content: finalContent,
+            })
+
+            toast.info(`${randomUser.name} made changes to the note`, {
+              position: 'bottom-left',
+              autoClose: 2000,
+            })
+
+            // Only check for conflicts after the last operation
+            if (i === numberOfEdits - 1) {
+              setTimeout(() => {
+                // Check for conflicts with the last operation to trigger conflict detection
+                get().checkForConflicts(operation)
+              }, 100) // Small delay to ensure all operations are complete
+            }
+          }, i * 500)
+        }
       },
 
       // User management

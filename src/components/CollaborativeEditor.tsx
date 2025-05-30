@@ -4,6 +4,7 @@ import { People as PeopleIcon } from '@mui/icons-material'
 import dayjs from 'dayjs'
 import { Note, User } from '@/models/notes'
 import TiptapEditor from './TiptapEditor'
+import { useNotesStore } from '@/provider/notesProvider'
 
 const CollaborativeEditor = React.memo<{
   note: Note
@@ -12,6 +13,11 @@ const CollaborativeEditor = React.memo<{
 }>(({ note, onContentChange, collaborators }) => {
   const [content, setContent] = useState(note.content)
   const [lastSaved, setLastSaved] = useState(Date.now())
+
+  // Get all users for simulation
+  const allUsers = useNotesStore((state) => state.users)
+  const currentUser = useNotesStore((state) => state.currentUser)
+  const simulateMultipleEdits = useNotesStore((state) => state.simulateMultipleEdits)
 
   useEffect(() => {
     setContent(note.content)
@@ -32,16 +38,13 @@ const CollaborativeEditor = React.memo<{
     setContent(html)
   }, [])
 
-  // Simulate collaborative editing
+  // Smart simulation - creates multiple rapid edits to trigger conflicts
   const simulateCollaboratorEdit = useCallback(() => {
-    const randomCollaborator = collaborators.find((c) => c.isActive && c.id !== note.lastEditedBy)
-    if (randomCollaborator) {
-      const collaboratorAddition = `<p><em>[${randomCollaborator.name} added a comment at ${dayjs().format('HH:mm')}]</em></p>`
-      const newContent = content + collaboratorAddition
-      setContent(newContent)
-      onContentChange(newContent)
-    }
-  }, [collaborators, content, note.lastEditedBy, onContentChange])
+    if (!note?.id) return
+
+    // Use the new simulation function that creates individual edit operations
+    simulateMultipleEdits(note.id, content)
+  }, [note?.id, content, simulateMultipleEdits])
 
   return (
     <div className='flex flex-col gap-2'>
@@ -54,7 +57,7 @@ const CollaborativeEditor = React.memo<{
 
         <Box display='flex' alignItems='center' gap={1}>
           <Button variant='outlined' size='small' onClick={simulateCollaboratorEdit} startIcon={<PeopleIcon />}>
-            Simulate Collaborator
+            Simulate Collaboration
           </Button>
         </Box>
       </Box>

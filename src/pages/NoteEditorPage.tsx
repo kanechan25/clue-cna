@@ -61,7 +61,6 @@ export const NoteEditorPage: React.FC = () => {
   const removeCollaborator = useNotesStore((state) => state.removeCollaborator)
   const resolveConflict = useNotesStore((state) => state.resolveConflict)
   const addEditOperation = useNotesStore((state) => state.addEditOperation)
-  const simulateCollaboratorEdit = useNotesStore((state) => state.simulateCollaboratorEdit)
 
   // Initialize note data
   useEffect(() => {
@@ -149,25 +148,37 @@ export const NoteEditorPage: React.FC = () => {
   )
 
   const handleResolveConflict = useCallback(
-    (conflictId: string, resolution: string) => {
-      resolveConflict(conflictId, resolution as any)
-    },
-    [resolveConflict],
-  )
+    (conflictId: string, resolution: string, selectedOperationId?: string) => {
+      if (resolution === 'manual' && selectedOperationId) {
+        // User selected a specific operation - keep only that edit
+        const conflict = conflicts.find((c) => c.id === conflictId)
+        if (conflict && currentNote) {
+          const selectedOperation = conflict.operations.find((op) => op.id === selectedOperationId)
+          if (selectedOperation) {
+            // Remove all conflicting edits from the note content and keep only the selected one
+            let newContent = currentNote.content
 
-  const handleSimulateEdit = useCallback(() => {
-    if (currentNote) {
-      const randomText = [
-        'Great point!',
-        'I agree with this approach.',
-        'Maybe we should consider...',
-        'Added some thoughts here.',
-        'This looks good to me.',
-      ]
-      const addition = `\n\n${randomText[Math.floor(Math.random() * randomText.length)]}`
-      simulateCollaboratorEdit(currentNote.id, currentNote.content + addition)
-    }
-  }, [currentNote, simulateCollaboratorEdit])
+            // Remove all conflicting edit comments
+            conflict.operations.forEach((operation) => {
+              // Extract the edit comment pattern and remove it
+              const editCommentRegex = new RegExp(`<p><em>\\[.*?edited this note at.*?\\]:.*?</em></p>`, 'g')
+              newContent = newContent.replace(editCommentRegex, '')
+            })
+
+            // Add back only the selected edit
+            newContent = newContent + selectedOperation.content
+
+            // Update the note with the resolved content
+            updateNote(currentNote.id, { content: newContent })
+          }
+        }
+        resolveConflict(conflictId, 'manual')
+      } else {
+        resolveConflict(conflictId, resolution as any)
+      }
+    },
+    [conflicts, currentNote, updateNote, resolveConflict],
+  )
 
   if (!currentNote) {
     return (
@@ -209,7 +220,7 @@ export const NoteEditorPage: React.FC = () => {
             {/* Save Status */}
             <Chip
               size='small'
-              label={saveStatus}
+              label={saveStatus === 'saved' ? 'auto saved' : saveStatus}
               color={saveStatus === 'saved' ? 'success' : saveStatus === 'saving' ? 'default' : 'error'}
               variant='outlined'
             />
@@ -222,7 +233,7 @@ export const NoteEditorPage: React.FC = () => {
             </Tooltip>
 
             {/* Conflicts indicator */}
-            {conflicts.length > 0 && (
+            {conflicts?.length > 0 && (
               <Tooltip title={`${conflicts.length} conflicts`}>
                 <IconButton onClick={() => setShowConflicts(true)} color='warning'>
                   <WarningIcon />
@@ -251,10 +262,12 @@ export const NoteEditorPage: React.FC = () => {
         open={Boolean(collaboratorMenuAnchor)}
         onClose={() => setCollaboratorMenuAnchor(null)}
       >
-        <MenuItem disabled>
-          <Typography variant='subtitle2'>Current Collaborators</Typography>
-        </MenuItem>
-        {collaborators.map((collaborator) => (
+        {collaborators?.length > 0 && (
+          <MenuItem disabled>
+            <Typography variant='subtitle2'>Current Collaborators</Typography>
+          </MenuItem>
+        )}
+        {collaborators?.map((collaborator) => (
           <MenuItem key={collaborator.id}>
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: collaborator.color, width: 32, height: 32 }}>{collaborator.name[0]}</Avatar>
@@ -291,21 +304,6 @@ export const NoteEditorPage: React.FC = () => {
         onResolve={handleResolveConflict}
         onClose={() => setShowConflicts(false)}
       />
-
-      {/* Development Helper */}
-      <Button
-        variant='outlined'
-        onClick={handleSimulateEdit}
-        sx={{
-          position: 'fixed',
-          bottom: 80,
-          right: 16,
-          display: { xs: 'none', md: 'flex' },
-        }}
-        startIcon={<PeopleIcon />}
-      >
-        Simulate Edit
-      </Button>
     </Box>
   )
 }

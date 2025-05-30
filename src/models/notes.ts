@@ -55,10 +55,11 @@ export interface NotesStore extends NotesState {
   setCurrentNote: (note: Note | null) => void
   duplicateNote: (id: string) => void
 
-  addEditOperation: (operation: Omit<EditOperation, 'id' | 'timestamp'>) => void
+  addEditOperation: (operation: Omit<EditOperation, 'id' | 'timestamp'>, skipConflictCheck?: boolean) => EditOperation
   checkForConflicts: (operation: EditOperation) => void
   resolveConflict: (conflictId: string, resolution: Conflict['resolution']) => void
   simulateCollaboratorEdit: (noteId: string, content: string) => void
+  simulateMultipleEdits: (noteId: string, baseContent: string) => void
 
   setCurrentUser: (user: User) => void
   addCollaborator: (noteId: string, userId: string) => void
