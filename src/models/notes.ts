@@ -55,7 +55,6 @@ export interface NotesStore extends NotesState {
   updateNote: (id: string, updates: Partial<Note>) => void
   deleteNote: (id: string) => void
   setCurrentNote: (note: Note | null) => void
-  duplicateNote: (id: string) => void
 
   addEditOperation: (operation: Omit<EditOperation, 'id' | 'timestamp'>, skipConflictCheck?: boolean) => EditOperation
   checkForConflicts: (operation: EditOperation) => void

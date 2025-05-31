@@ -22,7 +22,6 @@ export const defaultInitState: NotesStore = {
   updateNote: () => {},
   deleteNote: () => {},
   setCurrentNote: () => {},
-  duplicateNote: () => {},
   addEditOperation: () => ({}) as EditOperation,
   checkForConflicts: () => {},
   resolveConflict: () => {},
@@ -107,29 +106,6 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
 
       setCurrentNote: (note: Note | null) => {
         set(() => ({ currentNote: note }))
-      },
-
-      duplicateNote: (id: string) => {
-        const originalNote = get().notes.find((note) => note.id === id)
-        if (!originalNote) return
-
-        const duplicatedNote: Note = {
-          ...originalNote,
-          id: `note-${Date.now()}`,
-          title: `${originalNote.title} (Copy)`,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          lastEditedBy: get().currentUser?.id || 'anonymous',
-          collaborators: [get().currentUser?.id || 'anonymous'],
-          version: 1,
-        }
-
-        set((state) => ({
-          notes: [duplicatedNote, ...state.notes],
-        }))
-
-        get().saveToLocalStorage()
-        toast.success(`Note duplicated successfully!`)
       },
 
       // Real-time collaboration

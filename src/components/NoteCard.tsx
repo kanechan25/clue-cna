@@ -16,7 +16,7 @@ import {
   Edit as EditIcon,
   MoreVert as MoreVertIcon,
   Group as GroupIcon,
-  ContentCopy as CopyIcon,
+  Share as ShareIcon,
   Schedule as ScheduleIcon,
 } from '@mui/icons-material'
 import dayjs from 'dayjs'
@@ -52,9 +52,9 @@ const NoteCard = React.memo<{
   note: Note
   onEdit: (note: Note) => void
   onDelete: (id: string) => void
-  onDuplicate: (id: string) => void
+  onShare: (id: string) => void
   users: Array<{ id: string; name: string; color: string }>
-}>(({ note, onEdit, onDelete, onDuplicate, users }) => {
+}>(({ note, onEdit, onDelete, onShare, users }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [isLazyLoading, setIsLazyLoading] = useState<boolean>(false)
   const open = Boolean(anchorEl)
@@ -98,43 +98,15 @@ const NoteCard = React.memo<{
     handleMenuClose()
   }, [note, onEdit, handleMenuClose, isLazyLoading])
 
-  const handleCardClick = useCallback(async () => {
-    if (isLazyLoading) return
-
-    // Only lazy load if this is a large note
-    if (note.isLargeNote) {
-      setIsLazyLoading(true)
-      try {
-        // Pre-load the NoteEditorPage component
-        await lazyLoadNoteEditor()
-
-        // Small delay to show the loading effect
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        // Now navigate to the editor
-        onEdit(note)
-      } catch (error) {
-        console.error('Failed to lazy load editor:', error)
-        // Fallback: still navigate even if lazy loading fails
-        onEdit(note)
-      } finally {
-        setIsLazyLoading(false)
-      }
-    } else {
-      // Regular note - open immediately
-      onEdit(note)
-    }
-  }, [note, onEdit, isLazyLoading])
-
   const handleDelete = useCallback(() => {
     onDelete(note.id)
     handleMenuClose()
   }, [note.id, onDelete, handleMenuClose])
 
-  const handleDuplicate = useCallback(() => {
-    onDuplicate(note.id)
+  const handleShare = useCallback(() => {
+    onShare(note.id)
     handleMenuClose()
-  }, [note.id, onDuplicate, handleMenuClose])
+  }, [note.id, onShare, handleMenuClose])
 
   const collaborators = useMemo(
     () => users.filter((user) => note.collaborators.includes(user.id)),
@@ -162,7 +134,7 @@ const NoteCard = React.memo<{
           boxShadow: isLazyLoading ? 1 : 4,
         },
       }}
-      onClick={handleCardClick}
+      onClick={handleEdit}
     >
       {/* Loading overlay */}
       {isLazyLoading && (
@@ -278,9 +250,9 @@ const NoteCard = React.memo<{
           <EditIcon fontSize='small' sx={{ mr: 1 }} />
           Edit
         </MenuItem>
-        <MenuItem onClick={handleDuplicate}>
-          <CopyIcon fontSize='small' sx={{ mr: 1 }} />
-          Duplicate
+        <MenuItem onClick={handleShare}>
+          <ShareIcon fontSize='small' sx={{ mr: 1 }} />
+          Share
         </MenuItem>
         <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
           <DeleteIcon fontSize='small' sx={{ mr: 1 }} />

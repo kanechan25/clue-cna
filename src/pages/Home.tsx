@@ -3,6 +3,7 @@ import { Box, Container, Typography, Button, Fab, Skeleton, Alert } from '@mui/m
 import { Add as AddIcon } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
+import { toast } from 'react-toastify'
 import { useNotesStore } from '@/provider/notesProvider'
 import { Note } from '@/models/notes'
 import NoteCard from '@/components/NoteCard'
@@ -22,7 +23,6 @@ export const Home: React.FC = () => {
   const setSearchQuery = useNotesStore((state) => state.setSearchQuery)
   const createNote = useNotesStore((state) => state.createNote)
   const deleteNote = useNotesStore((state) => state.deleteNote)
-  const duplicateNote = useNotesStore((state) => state.duplicateNote)
   const setCurrentNote = useNotesStore((state) => state.setCurrentNote)
 
   const handleSearchChange = useCallback(
@@ -47,11 +47,20 @@ export const Home: React.FC = () => {
     [deleteNote],
   )
 
-  const handleDuplicateNote = useCallback(
-    (id: string) => {
-      duplicateNote(id)
+  const handleShareNote = useCallback(
+    async (id: string) => {
+      const note = notes.find((n) => n.id === id)
+      if (!note) return
+
+      try {
+        const shareableLink = `${window.location.origin}/note/${id}`
+        await navigator.clipboard.writeText(shareableLink)
+        toast.success(`Link copied to clipboard! Let's share "${note.title}" with others.`)
+      } catch {
+        toast.error(`Failed to share link!`)
+      }
     },
-    [duplicateNote],
+    [notes],
   )
 
   const handleCreateNote = useCallback(
@@ -156,7 +165,7 @@ export const Home: React.FC = () => {
                 note={note}
                 onEdit={handleEditNote}
                 onDelete={handleDeleteNote}
-                onDuplicate={handleDuplicateNote}
+                onShare={handleShareNote}
                 users={users}
               />
             ))}

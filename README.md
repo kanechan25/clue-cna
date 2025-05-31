@@ -9,7 +9,7 @@ A modern, real-time collaborative note-taking application built with React, Type
 - **📝 Note List**: Display all user-created notes with timestamps and preview
 - **🔍 Real-time Search**: Search notes by title and content
 - **➕ Quick Create**: Create new notes with title and content
-- **🗑️ Delete & Duplicate**: Manage notes with context menu actions
+- **🗑️ Delete & Share**: Manage notes with context menu actions
 - **👥 Collaborator Indicators**: See who's working on each note
 - **📱 Responsive Design**: Optimized for mobile, tablet, and desktop
 
