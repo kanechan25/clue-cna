@@ -34,8 +34,8 @@ export const createMockNotes = (): Note[] => [
   },
   {
     id: 'note-3',
-    title: 'Responsibilities',
-    content: `<ul class="tiptap-bullet-list"><li><p>Directly code core features, break down and delegate tasks.</p></li></ul><ol class="tiptap-ordered-list"><li><p>Design patterns, SSR best practices, core UI libraries, code reviews.</p></li><li><p>Prioritized test coverage for key features</p></li></ol>`,
+    title: 'Lazy loading this card',
+    content: `<ul class="tiptap-bullet-list"><li><p>Imagine this card has heavy images or heavy contents.</p></li></ul><ul class="tiptap-bullet-list"><li><p>=> Will be lazy loading before open it</p></li></ul><ul class="tiptap-bullet-list"><li><p>Has many heavy notes here ...</p></li></ul>`,
     createdAt: dayjs().subtract(3, 'hours').toISOString(),
     updatedAt: dayjs().subtract(30, 'minutes').toISOString(),
     lastEditedBy: 'user-4',

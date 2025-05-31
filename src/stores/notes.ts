@@ -236,7 +236,7 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
         const availableUsers = MOCK_USERS.filter((user) => user.id !== get().currentUser?.id)
         if (availableUsers.length === 0) return
 
-        // Create 3 different edit operations from different users
+        // TODO: Create edit operations from different users, just only people who belongs to active collaborations
         const numberOfEdits = 3
         const allOperations: EditOperation[] = []
         let finalContent = baseContent

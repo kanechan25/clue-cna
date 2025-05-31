@@ -42,9 +42,6 @@ const ConflictModal = React.memo<{
 
   const handleAutoResolve = (conflictId: string) => {
     const latestOperationId = getLatestOperationId(conflicts, conflictId)
-
-    console.log('latestOperationId', latestOperationId)
-
     onResolve(conflictId, 'latest-wins', latestOperationId)
     onClose()
   }

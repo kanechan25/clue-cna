@@ -169,10 +169,8 @@ export const NoteEditorPage: React.FC = () => {
           const editCommentRegex = new RegExp(`<p><em>\\[.*?edited this note at.*?\\]:.*?</em></p>`, 'g')
           newContent = newContent.replace(editCommentRegex, '')
         })
-        console.log('selectedOperation.content', selectedOperation.content)
         // Add back only the selected edit
         newContent = newContent + cleanEditorContent(selectedOperation.content)
-        console.log('newContent', newContent)
         // Update the note with the resolved content
         updateNote(currentNote.id, { content: newContent })
       }
