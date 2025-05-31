@@ -12,12 +12,10 @@ function App() {
         <NotesStoreProvider>
           <BrowserRouter>
             <Routes>
-              <Route>
-                {routers.map((route) => (
-                  <Route key={route.id} path={route.href} element={route.element} />
-                ))}
-                <Route path='*' element={<Navigate to='/' replace />} />
-              </Route>
+              {routers.map((route) => (
+                <Route key={route.id} path={route.href} element={route.element} />
+              ))}
+              <Route path='*' element={<Navigate to='/' replace />} />
             </Routes>
           </BrowserRouter>
         </NotesStoreProvider>

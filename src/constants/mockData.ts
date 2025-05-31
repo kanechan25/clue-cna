@@ -19,6 +19,7 @@ export const createMockNotes = (): Note[] => [
     lastEditedBy: 'user-1',
     collaborators: ['user-1', 'user-5'],
     isDeleted: false,
+    isLargeNote: false,
     version: 3,
   },
   {
@@ -30,17 +31,19 @@ export const createMockNotes = (): Note[] => [
     lastEditedBy: 'user-2',
     collaborators: ['user-1', 'user-2', 'user-3'],
     isDeleted: false,
+    isLargeNote: false,
     version: 5,
   },
   {
     id: 'note-3',
-    title: 'Lazy loading this card',
+    title: 'Lazy load',
     content: `<ul class="tiptap-bullet-list"><li><p>Imagine this card has heavy images or heavy contents.</p></li></ul><ul class="tiptap-bullet-list"><li><p>=> Will be lazy loading before open it</p></li></ul><ul class="tiptap-bullet-list"><li><p>Has many heavy notes here ...</p></li></ul>`,
     createdAt: dayjs().subtract(3, 'hours').toISOString(),
     updatedAt: dayjs().subtract(30, 'minutes').toISOString(),
     lastEditedBy: 'user-4',
     collaborators: ['user-2', 'user-4'],
     isDeleted: false,
+    isLargeNote: true,
     version: 2,
   },
 ]

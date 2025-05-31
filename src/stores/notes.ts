@@ -54,6 +54,7 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
           lastEditedBy: get().currentUser?.id || 'anonymous',
           collaborators: [get().currentUser?.id || 'anonymous'],
           isDeleted: false,
+          isLargeNote: false,
           version: 1,
         }
 

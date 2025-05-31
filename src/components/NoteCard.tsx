@@ -1,5 +1,16 @@
 import React, { useMemo, useCallback, useState } from 'react'
-import { Box, Typography, Card, CardContent, IconButton, Chip, Avatar, Menu, MenuItem } from '@mui/material'
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  IconButton,
+  Chip,
+  Avatar,
+  Menu,
+  MenuItem,
+  CircularProgress,
+} from '@mui/material'
 import {
   Delete as DeleteIcon,
   Edit as EditIcon,
@@ -16,6 +27,10 @@ import RenderNote from './RenderNote'
 dayjs.extend(relativeTime)
 
 const MAX_PREVIEW_LENGTH = 250
+
+// Lazy load the NoteEditorPage component
+const lazyLoadNoteEditor = () => import('@/pages/NoteEditorPage').then((module) => module.NoteEditorPage)
+
 // just preview MAX_PREVIEW_LENGTH characters of HTML content
 const truncateHtmlContent = (html: string, maxLength: number = MAX_PREVIEW_LENGTH): string => {
   const tempDiv = document.createElement('div')
@@ -41,6 +56,7 @@ const NoteCard = React.memo<{
   users: Array<{ id: string; name: string; color: string }>
 }>(({ note, onEdit, onDelete, onDuplicate, users }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [isLazyLoading, setIsLazyLoading] = useState<boolean>(false)
   const open = Boolean(anchorEl)
 
   const handleMenuClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -52,10 +68,63 @@ const NoteCard = React.memo<{
     setAnchorEl(null)
   }, [])
 
-  const handleEdit = useCallback(() => {
-    onEdit(note)
+  const handleEdit = useCallback(async () => {
+    if (isLazyLoading) return
+
+    // Only lazy load if this is a large note
+    if (note.isLargeNote) {
+      setIsLazyLoading(true)
+      try {
+        // Pre-load the NoteEditorPage component
+        await lazyLoadNoteEditor()
+
+        // Small delay to show the loading effect
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
+        // Now navigate to the editor
+        onEdit(note)
+      } catch (error) {
+        console.error('Failed to lazy load editor:', error)
+        // Fallback: still navigate even if lazy loading fails
+        onEdit(note)
+      } finally {
+        setIsLazyLoading(false)
+      }
+    } else {
+      // Regular note - open immediately
+      onEdit(note)
+    }
+
     handleMenuClose()
-  }, [note, onEdit, handleMenuClose])
+  }, [note, onEdit, handleMenuClose, isLazyLoading])
+
+  const handleCardClick = useCallback(async () => {
+    if (isLazyLoading) return
+
+    // Only lazy load if this is a large note
+    if (note.isLargeNote) {
+      setIsLazyLoading(true)
+      try {
+        // Pre-load the NoteEditorPage component
+        await lazyLoadNoteEditor()
+
+        // Small delay to show the loading effect
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
+        // Now navigate to the editor
+        onEdit(note)
+      } catch (error) {
+        console.error('Failed to lazy load editor:', error)
+        // Fallback: still navigate even if lazy loading fails
+        onEdit(note)
+      } finally {
+        setIsLazyLoading(false)
+      }
+    } else {
+      // Regular note - open immediately
+      onEdit(note)
+    }
+  }, [note, onEdit, isLazyLoading])
 
   const handleDelete = useCallback(() => {
     onDelete(note.id)
@@ -84,15 +153,42 @@ const NoteCard = React.memo<{
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        cursor: 'pointer',
+        cursor: isLazyLoading ? 'wait' : 'pointer',
+        position: 'relative',
         transition: 'all 0.2s ease-in-out',
+        opacity: isLazyLoading ? 0.8 : 1,
         '&:hover': {
-          transform: 'scale(1.05)',
-          boxShadow: 4,
+          transform: isLazyLoading ? 'none' : 'scale(1.05)',
+          boxShadow: isLazyLoading ? 1 : 4,
         },
       }}
-      onClick={handleEdit}
+      onClick={handleCardClick}
     >
+      {/* Loading overlay */}
+      {isLazyLoading && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            zIndex: 10,
+            borderRadius: 1,
+          }}
+        >
+          <CircularProgress size={32} />
+          <Typography variant='caption' sx={{ mt: 1, color: 'text.secondary' }}>
+            Loading...
+          </Typography>
+        </Box>
+      )}
+
       <CardContent sx={{ flexGrow: 1, pb: 1 }}>
         <Box display='flex' justifyContent='space-between' alignItems='flex-start' mb={1}>
           <Typography
@@ -110,6 +206,15 @@ const NoteCard = React.memo<{
             }}
           >
             {note.title}
+            {note.isLargeNote && (
+              <Chip
+                label='Large note'
+                size='small'
+                color='warning'
+                variant='outlined'
+                sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+              />
+            )}
           </Typography>
           <IconButton size='small' onClick={handleMenuClick} sx={{ ml: 1, flexShrink: 0 }}>
             <MoreVertIcon />
