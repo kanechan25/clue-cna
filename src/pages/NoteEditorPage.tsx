@@ -28,6 +28,8 @@ import dayjs from 'dayjs'
 import { useNotesStore } from '@/provider/notesProvider'
 import ConflictModal from '@/components/ConflictModal'
 import CollaborativeEditor from '@/components/CollaborativeEditor'
+import { ConflictResolution } from '@/models/notes'
+import { cleanEditorContent } from '@/utils'
 
 export const NoteEditorPage: React.FC = () => {
   const navigate = useNavigate()
@@ -149,33 +151,33 @@ export const NoteEditorPage: React.FC = () => {
 
   const handleResolveConflict = useCallback(
     (conflictId: string, resolution: string, selectedOperationId?: string) => {
-      if (resolution === 'manual' && selectedOperationId) {
-        // User selected a specific operation - keep only that edit
-        const conflict = conflicts.find((c) => c.id === conflictId)
-        if (conflict && currentNote) {
-          const selectedOperation = conflict.operations.find((op) => op.id === selectedOperationId)
-          if (selectedOperation) {
-            // Remove all conflicting edits from the note content and keep only the selected one
-            let newContent = currentNote.content
-
-            // Remove all conflicting edit comments
-            conflict.operations.forEach((operation) => {
-              // Extract the edit comment pattern and remove it
-              const editCommentRegex = new RegExp(`<p><em>\\[.*?edited this note at.*?\\]:.*?</em></p>`, 'g')
-              newContent = newContent.replace(editCommentRegex, '')
-            })
-
-            // Add back only the selected edit
-            newContent = newContent + selectedOperation.content
-
-            // Update the note with the resolved content
-            updateNote(currentNote.id, { content: newContent })
-          }
-        }
-        resolveConflict(conflictId, 'manual')
-      } else {
-        resolveConflict(conflictId, resolution as any)
+      const conflict = conflicts.find((c) => c.id === conflictId)
+      if (!conflict || !currentNote) {
+        resolveConflict(conflictId, resolution as ConflictResolution)
+        return
       }
+      if (!selectedOperationId) return
+      const selectedOperation = conflict.operations.find((op) => op.id === selectedOperationId)
+
+      if (selectedOperation) {
+        // Remove all conflicting edits from the note content and keep only the selected one
+        let newContent = currentNote.content
+
+        // Remove all conflicting edit comments
+        conflict.operations.forEach(() => {
+          // Extract the edit comment pattern and remove it
+          const editCommentRegex = new RegExp(`<p><em>\\[.*?edited this note at.*?\\]:.*?</em></p>`, 'g')
+          newContent = newContent.replace(editCommentRegex, '')
+        })
+        console.log('selectedOperation.content', selectedOperation.content)
+        // Add back only the selected edit
+        newContent = newContent + cleanEditorContent(selectedOperation.content)
+        console.log('newContent', newContent)
+        // Update the note with the resolved content
+        updateNote(currentNote.id, { content: newContent })
+      }
+
+      resolveConflict(conflictId, resolution as ConflictResolution)
     },
     [conflicts, currentNote, updateNote, resolveConflict],
   )

@@ -2,8 +2,8 @@ import { createStore } from 'zustand/vanilla'
 import { subscribeWithSelector } from 'zustand/middleware'
 import dayjs from 'dayjs'
 import { toast } from 'react-toastify'
-import { NotesStore, Note, User, EditOperation, Conflict } from '@/models/notes'
-import { createMockNotes, MOCK_USERS } from '@/constants/mockData'
+import { NotesStore, Note, User, EditOperation, Conflict, ConflictResolution } from '@/models/notes'
+import { createMockNotes, MOCK_USERS, randomCommentText } from '@/constants/mockData'
 
 const STORAGE_KEY = 'collaborative-notes-app'
 const CLEANUP_INTERVAL = 60 * 1000 * 2
@@ -189,15 +189,11 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
             set((state) => ({
               conflicts: [conflict, ...state.conflicts],
             }))
-
-            toast.warn('Editing conflict detected!', {
-              position: 'top-right',
-            })
           }
         }
       },
 
-      resolveConflict: (conflictId: string, resolution: Conflict['resolution']) => {
+      resolveConflict: (conflictId: string, resolution: ConflictResolution) => {
         set((state) => {
           const conflict = state.conflicts.find((c) => c.id === conflictId)
           if (!conflict) return state
@@ -234,11 +230,6 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
           content: newContentAdded || content.slice(-100), // Store the actual edit content
           version: get().notes.find((n) => n.id === noteId)?.version || 1,
         })
-
-        toast.info(`${randomUser.name} made changes to the note`, {
-          position: 'bottom-left',
-          autoClose: 3000,
-        })
       },
 
       simulateMultipleEdits: (noteId: string, baseContent: string) => {
@@ -253,18 +244,10 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
         for (let i = 0; i < numberOfEdits; i++) {
           setTimeout(() => {
             const randomUser = availableUsers[i % availableUsers.length]
-            const randomText = [
-              'Maybe we should consider...',
-              'Interesting idea! 💡',
-              'Can we expand on this section?',
-              'Let me add my perspective on this.',
-              'I have some concerns about this.',
-            ][i % 5]
-
+            const randomText = randomCommentText[Math.floor(Math.random() * randomCommentText.length)]
             const timestamp = dayjs().format('DD/MM/YYYY HH:mm:ss')
             const editComment = `<p><em>[${randomUser.name} edited this note at ${timestamp}]: ${randomText}</em></p>`
 
-            // Create individual edit operation for each user (skip conflict check for now)
             const operation = get().addEditOperation(
               {
                 noteId,
@@ -293,11 +276,10 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
             // Only check for conflicts after the last operation
             if (i === numberOfEdits - 1) {
               setTimeout(() => {
-                // Check for conflicts with the last operation to trigger conflict detection
                 get().checkForConflicts(operation)
               }, 100) // Small delay to ensure all operations are complete
             }
-          }, i * 500)
+          }, i * 700)
         }
       },
 

@@ -14,9 +14,6 @@ const CollaborativeEditor = React.memo<{
   const [content, setContent] = useState(note.content)
   const [lastSaved, setLastSaved] = useState(Date.now())
 
-  // Get all users for simulation
-  const allUsers = useNotesStore((state) => state.users)
-  const currentUser = useNotesStore((state) => state.currentUser)
   const simulateMultipleEdits = useNotesStore((state) => state.simulateMultipleEdits)
 
   useEffect(() => {
@@ -29,7 +26,7 @@ const CollaborativeEditor = React.memo<{
     const timer = setTimeout(() => {
       onContentChange(content)
       setLastSaved(Date.now())
-    }, 1000) // Auto-save after 1 second of inactivity
+    }, 1000) // Auto-save after 1 second
 
     return () => clearTimeout(timer)
   }, [content, note.content, onContentChange])
@@ -38,11 +35,9 @@ const CollaborativeEditor = React.memo<{
     setContent(html)
   }, [])
 
-  // Smart simulation - creates multiple rapid edits to trigger conflicts
+  // creates multiple rapid edits to trigger conflicts
   const simulateCollaboratorEdit = useCallback(() => {
     if (!note?.id) return
-
-    // Use the new simulation function that creates individual edit operations
     simulateMultipleEdits(note.id, content)
   }, [note?.id, content, simulateMultipleEdits])
 

@@ -29,12 +29,13 @@ export interface EditOperation {
   version: number
 }
 
+export type ConflictResolution = 'manual' | 'latest-wins'
 export interface Conflict {
   id: string
   noteId: string
   operations: EditOperation[]
   resolvedAt?: string
-  resolution?: 'manual' | 'auto-merge' | 'latest-wins'
+  resolution?: ConflictResolution
 }
 
 export interface NotesState {
@@ -57,7 +58,7 @@ export interface NotesStore extends NotesState {
 
   addEditOperation: (operation: Omit<EditOperation, 'id' | 'timestamp'>, skipConflictCheck?: boolean) => EditOperation
   checkForConflicts: (operation: EditOperation) => void
-  resolveConflict: (conflictId: string, resolution: Conflict['resolution']) => void
+  resolveConflict: (conflictId: string, resolution: ConflictResolution) => void
   simulateCollaboratorEdit: (noteId: string, content: string) => void
   simulateMultipleEdits: (noteId: string, baseContent: string) => void
 
@@ -72,11 +73,4 @@ export interface NotesStore extends NotesState {
   loadFromLocalStorage: () => void
 
   clearOldOperations: () => void
-}
-
-export type FormatType = 'bold' | 'italic' | 'underline' | 'bulletList' | 'numberedList'
-
-export interface RichTextCommand {
-  type: FormatType
-  isActive: boolean
 }

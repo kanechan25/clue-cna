@@ -1,33 +1,25 @@
 import React from 'react'
-import {
-  Box,
-  Typography,
-  Button,
-  Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Divider,
-} from '@mui/material'
+import { Box, Typography, Button, Paper, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
 import { Warning as WarningIcon, Person as PersonIcon } from '@mui/icons-material'
 import dayjs from 'dayjs'
 import { useNotesStore } from '@/provider/notesProvider'
 import RenderNote from './RenderNote'
+import { Conflict } from '@/models/notes'
+import { getLatestOperationId } from '@/utils'
 
-interface ConflictOperation {
-  id: string
-  userId: string
-  content: string
-  timestamp: string
-  operation: string
-}
+// interface ConflictOperation {
+//   id: string
+//   userId: string
+//   content: string
+//   timestamp: string
+//   operation: string
+// }
 
-interface Conflict {
-  id: string
-  noteId: string
-  operations: ConflictOperation[]
-}
+// interface Conflict {
+//   id: string
+//   noteId: string
+//   operations: ConflictOperation[]
+// }
 
 const ConflictModal = React.memo<{
   open: boolean
@@ -49,7 +41,11 @@ const ConflictModal = React.memo<{
   }
 
   const handleAutoResolve = (conflictId: string) => {
-    onResolve(conflictId, 'latest-wins')
+    const latestOperationId = getLatestOperationId(conflicts, conflictId)
+
+    console.log('latestOperationId', latestOperationId)
+
+    onResolve(conflictId, 'latest-wins', latestOperationId)
     onClose()
   }
 
@@ -73,7 +69,7 @@ const ConflictModal = React.memo<{
             </Typography>
 
             <Box sx={{ maxHeight: 300, overflowY: 'auto' }}>
-              {conflict.operations.map((operation, index) => (
+              {conflict.operations.map((operation) => (
                 <Box key={operation.id} sx={{ mb: 1 }}>
                   <Paper
                     variant='outlined'
@@ -91,8 +87,7 @@ const ConflictModal = React.memo<{
                         {dayjs(operation.timestamp).format('DD/MM/YYYY HH:mm:ss')}
                       </Typography>
                     </Box>
-                    <Typography
-                      variant='body2'
+                    <Box
                       sx={{
                         bgcolor: 'grey.800',
                         p: 1,
@@ -103,7 +98,7 @@ const ConflictModal = React.memo<{
                       }}
                     >
                       <RenderNote previewContent={operation?.content} />
-                    </Typography>
+                    </Box>
                     <Button
                       size='small'
                       variant='outlined'
@@ -116,7 +111,6 @@ const ConflictModal = React.memo<{
                       Use This Edit
                     </Button>
                   </Paper>
-                  {index < conflict.operations.length - 1 && <Divider sx={{ my: 1 }} />}
                 </Box>
               ))}
             </Box>
@@ -130,7 +124,9 @@ const ConflictModal = React.memo<{
         ))}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button variant='contained' onClick={onClose}>
+          Close
+        </Button>
       </DialogActions>
     </Dialog>
   )
