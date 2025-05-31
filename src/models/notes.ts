@@ -47,6 +47,7 @@ export interface NotesState {
   editOperations: EditOperation[]
   conflicts: Conflict[]
   isLoading: boolean
+  isLoaded: boolean
   searchQuery: string
 }
 

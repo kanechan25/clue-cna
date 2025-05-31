@@ -47,6 +47,7 @@ export const NoteEditorPage: React.FC = () => {
   const users = useNotesStore((state) => state.users)
   const currentUser = useNotesStore((state) => state.currentUser)
   const allConflicts = useNotesStore((state) => state.conflicts)
+  const isLoaded = useNotesStore((state) => state.isLoaded)
 
   // Memoized derived values
   const currentNote = useMemo(() => {
@@ -63,16 +64,33 @@ export const NoteEditorPage: React.FC = () => {
   const removeCollaborator = useNotesStore((state) => state.removeCollaborator)
   const resolveConflict = useNotesStore((state) => state.resolveConflict)
   const addEditOperation = useNotesStore((state) => state.addEditOperation)
+  const setCurrentNote = useNotesStore((state) => state.setCurrentNote)
 
-  // Initialize note data
+  // Initialize note data - wait for store to be loaded
   useEffect(() => {
-    if (currentNote) {
-      setTitle(currentNote.title)
-    } else if (noteId) {
+    if (!isLoaded || !noteId) return // Wait for data to be loaded
+
+    // First, try to find the note in the store
+    const foundNote = notes.find((note) => note.id === noteId)
+
+    if (foundNote) {
+      // Set the current note if found
+      if (!currentNote || currentNote.id !== noteId) {
+        setCurrentNote(foundNote)
+      }
+      setTitle(foundNote.title)
+    } else {
       // If note not found, redirect to home
       navigate('/')
     }
-  }, [currentNote, noteId, navigate])
+  }, [isLoaded, noteId, notes, currentNote, setCurrentNote, navigate])
+
+  // Update title when currentNote changes
+  useEffect(() => {
+    if (currentNote) {
+      setTitle(currentNote.title)
+    }
+  }, [currentNote])
 
   // Handle conflicts
   useEffect(() => {
@@ -179,6 +197,16 @@ export const NoteEditorPage: React.FC = () => {
     },
     [conflicts, currentNote, updateNote, resolveConflict],
   )
+
+  if (!isLoaded) {
+    return (
+      <Box display='flex' justifyContent='center' alignItems='center' minHeight='50vh'>
+        <Typography variant='h6' color='text.secondary'>
+          Loading...
+        </Typography>
+      </Box>
+    )
+  }
 
   if (!currentNote) {
     return (

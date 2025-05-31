@@ -17,6 +17,7 @@ export const defaultInitState: NotesStore = {
   editOperations: [],
   conflicts: [],
   isLoading: false,
+  isLoaded: false,
   searchQuery: '',
   createNote: () => {},
   updateNote: () => {},
@@ -330,6 +331,7 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
               notes: notes || [],
               users: users || MOCK_USERS,
               currentUser: currentUser || MOCK_USERS[0],
+              isLoaded: true,
             }))
           } else {
             // Initialize with mock data if no saved data
@@ -337,6 +339,7 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
               notes: createMockNotes(),
               users: MOCK_USERS,
               currentUser: MOCK_USERS[0],
+              isLoaded: true,
             }))
             get().saveToLocalStorage()
           }
@@ -347,6 +350,7 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
             notes: createMockNotes(),
             users: MOCK_USERS,
             currentUser: MOCK_USERS[0],
+            isLoaded: true,
           }))
           toast.error('Failed to load saved data, using default data')
         }
