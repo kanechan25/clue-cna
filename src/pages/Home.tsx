@@ -7,8 +7,8 @@ import { toast } from 'react-toastify'
 import { useNotesStore } from '@/provider/notesProvider'
 import { Note } from '@/models/notes'
 import NoteCard from '@/components/NoteCard'
-import CreateNoteModal from '@/components/CreateNoteModal'
-import Header from '@/components/Header'
+import CreateNoteModal from '@/components/common/CreateNoteModal'
+import Header from '@/components/common/Header'
 
 const GRID_STYLES = {
   display: 'grid',

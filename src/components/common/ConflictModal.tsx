@@ -13,7 +13,6 @@ const ConflictModal = React.memo<{
   onResolve: (conflictId: string, resolution: string, selectedOperationId?: string) => void
   onClose: () => void
 }>(({ open, conflicts, onResolve, onClose }) => {
-  // Get users to map IDs to names
   const users = useNotesStore((state) => state.users)
 
   const getUserName = (userId: string) => {

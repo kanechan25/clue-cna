@@ -19,12 +19,7 @@ import {
 } from '@mui/icons-material'
 import { useTheme } from '@/provider/themeProvider'
 import ClueLogo from '@/assets/images/clue.svg'
-
-interface HeaderProps {
-  searchQuery: string
-  onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-  onNewNoteClick: () => void
-}
+import { HeaderProps } from '@/models/types'
 
 export const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, onNewNoteClick }) => {
   const { isDarkMode, toggleTheme } = useTheme()

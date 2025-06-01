@@ -26,7 +26,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { useNotesStore } from '@/provider/notesProvider'
-import ConflictModal from '@/components/ConflictModal'
+import ConflictModal from '@/components/common/ConflictModal'
 import CollaborativeEditor from '@/components/CollaborativeEditor'
 import { ConflictResolution } from '@/models/notes'
 import { cleanEditorContent } from '@/utils'

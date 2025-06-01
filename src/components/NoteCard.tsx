@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   Box,
   Typography,
@@ -21,77 +21,19 @@ import {
 } from '@mui/icons-material'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { Note } from '@/models/notes'
-import RenderNote from './RenderNote'
+import RenderNote from './common/RenderNote'
+import { truncateHtmlContent, MAX_PREVIEW_LENGTH } from '@/utils/truncate'
+import { NoteCardProps } from '@/models/types'
 
 dayjs.extend(relativeTime)
 
-const MAX_PREVIEW_LENGTH = 250
-
 const lazyLoadNoteEditor = () => import('@/pages/NoteEditorPage').then((module) => module.NoteEditorPage)
-
-// Optimized HTML truncation with memoization and improved DOM handling
-const createTruncationCache = () => {
-  const cache = new Map()
-  const MAX_CACHE_SIZE = 100
-
-  return {
-    get: (key: string) => cache.get(key),
-    set: (key: string, value: string) => {
-      if (cache.size >= MAX_CACHE_SIZE) {
-        const firstKey = cache.keys().next().value
-        cache.delete(firstKey)
-      }
-      cache.set(key, value)
-    },
-    clear: () => cache.clear(),
-  }
-}
-
-const truncationCache = createTruncationCache()
-
-// Optimized truncation function with caching and performance improvements
-const truncateHtmlContent = (html: string, maxLength: number = MAX_PREVIEW_LENGTH): string => {
-  const cacheKey = `${html.substring(0, 50)}-${maxLength}`
-  const cached = truncationCache.get(cacheKey)
-  if (cached) return cached
-
-  // Use DocumentFragment for better performance
-  const fragment = document.createDocumentFragment()
-  const tempDiv = document.createElement('div')
-  fragment.appendChild(tempDiv)
-  tempDiv.innerHTML = html
-
-  const textContent = tempDiv.textContent || tempDiv.innerText || ''
-
-  let result: string
-  if (textContent.length <= maxLength) {
-    result = html
-  } else {
-    const truncatedText = textContent.slice(0, maxLength)
-    const lastSpaceIndex = truncatedText.lastIndexOf(' ')
-    const finalLength = lastSpaceIndex > 0 ? lastSpaceIndex : maxLength
-    result = textContent.slice(0, finalLength) + '...'
-  }
-
-  truncationCache.set(cacheKey, result)
-  return result
-}
-
-interface NoteCardProps {
-  note: Note
-  onEdit: (note: Note) => void
-  onDelete: (id: string) => void
-  onShare: (id: string) => void
-  users: Array<{ id: string; name: string; color: string }>
-}
 
 const NoteCard = React.memo<NoteCardProps>(({ note, onEdit, onDelete, onShare, users }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [isLazyLoading, setIsLazyLoading] = useState<boolean>(false)
   const open = Boolean(anchorEl)
 
-  // Simple handlers - no memoization needed for DOM events
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation()
     setAnchorEl(event.currentTarget)
@@ -103,28 +45,20 @@ const NoteCard = React.memo<NoteCardProps>(({ note, onEdit, onDelete, onShare, u
 
   const handleEdit = async () => {
     if (isLazyLoading) return
-
     // Only lazy load if this is a large note
     if (note.isLargeNote) {
       setIsLazyLoading(true)
       try {
-        // Pre-load the NoteEditorPage component
         await lazyLoadNoteEditor()
-
-        // Small delay to show the loading effect
         await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        // Now navigate to the editor
         onEdit(note)
       } catch (error) {
         console.error('Failed to lazy load editor:', error)
-        // Fallback: still navigate even if lazy loading fails
         onEdit(note)
       } finally {
         setIsLazyLoading(false)
       }
     } else {
-      // Regular note - open immediately
       onEdit(note)
     }
 
@@ -141,7 +75,6 @@ const NoteCard = React.memo<NoteCardProps>(({ note, onEdit, onDelete, onShare, u
     handleMenuClose()
   }
 
-  // Keep expensive operations memoized
   const collaborators = useMemo(
     () => users.filter((user) => note.collaborators.includes(user.id)),
     [users, note.collaborators],
@@ -151,11 +84,9 @@ const NoteCard = React.memo<NoteCardProps>(({ note, onEdit, onDelete, onShare, u
     return truncateHtmlContent(note.content, MAX_PREVIEW_LENGTH)
   }, [note.content])
 
-  // Simple computations - no memoization needed
   const isHtmlContent = note.content.includes('<') && note.content.includes('>')
   const formattedDate = dayjs(note.createdAt).format('DD/MM/YYYY HH:mm:ss')
 
-  // Simple style objects - no memoization needed
   const cardStyles = {
     height: '100%',
     display: 'flex',

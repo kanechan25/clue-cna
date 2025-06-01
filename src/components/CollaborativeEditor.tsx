@@ -3,7 +3,7 @@ import { Box, Typography, Button, Avatar, Tooltip } from '@mui/material'
 import { People as PeopleIcon } from '@mui/icons-material'
 import dayjs from 'dayjs'
 import { Note, User } from '@/models/notes'
-import TiptapEditor from './TiptapEditor'
+import TiptapEditor from './common/TiptapEditor'
 import { useNotesStore } from '@/provider/notesProvider'
 
 const CollaborativeEditor = React.memo<{

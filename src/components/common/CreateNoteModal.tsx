@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Box } from '@mui/material'
-import TiptapEditor from './TiptapEditor'
+import TiptapEditor from '@/components/common/TiptapEditor'
 
 const CreateNoteModal = React.memo<{
   open: boolean
