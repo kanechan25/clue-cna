@@ -68,8 +68,6 @@ export interface NotesStore extends NotesState {
   removeCollaborator: (noteId: string, userId: string) => void
 
   setSearchQuery: (query: string) => void
-  getFilteredNotes: () => Note[]
-
   saveToLocalStorage: () => void
   loadFromLocalStorage: () => void
 

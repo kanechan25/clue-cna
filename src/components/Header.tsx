@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React from 'react'
 import {
   AppBar,
   Toolbar,
@@ -19,7 +19,6 @@ import {
 } from '@mui/icons-material'
 import { useTheme } from '@/provider/themeProvider'
 import ClueLogo from '@/assets/images/clue.svg'
-import { useDebounce } from '@/hooks/useDebounce'
 
 interface HeaderProps {
   searchQuery: string
@@ -32,17 +31,6 @@ export const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, onN
   const muiTheme = useMuiTheme()
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'))
 
-  // Keep debounced search - this might have some benefit
-  const debouncedSearchChange = useDebounce(onSearchChange, 300)
-
-  const handleSearchChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      debouncedSearchChange(event)
-    },
-    [debouncedSearchChange],
-  )
-
-  // Simple style objects - no memoization needed
   const appBarStyles = {
     width: '100%',
     left: 0,
@@ -101,8 +89,8 @@ export const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, onN
           <TextField
             variant='outlined'
             placeholder={isMobile ? 'Search...' : 'Search notes...'}
-            defaultValue={searchQuery}
-            onChange={handleSearchChange}
+            value={searchQuery}
+            onChange={onSearchChange}
             size='small'
             sx={textFieldStyles}
             slotProps={{

@@ -7,20 +7,6 @@ import RenderNote from './RenderNote'
 import { Conflict } from '@/models/notes'
 import { getLatestOperationId } from '@/utils'
 
-// interface ConflictOperation {
-//   id: string
-//   userId: string
-//   content: string
-//   timestamp: string
-//   operation: string
-// }
-
-// interface Conflict {
-//   id: string
-//   noteId: string
-//   operations: ConflictOperation[]
-// }
-
 const ConflictModal = React.memo<{
   open: boolean
   conflicts: Conflict[]
@@ -55,8 +41,8 @@ const ConflictModal = React.memo<{
         </Box>
       </DialogTitle>
       <DialogContent>
-        <Typography variant='body2' color='text.secondary' paragraph>
-          Multiple users are editing this note simultaneously. Choose how to resolve conflicts:
+        <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
+          Multiple users have edited this note simultaneously. Choose how to resolve the conflict:
         </Typography>
 
         {conflicts?.map((conflict) => (

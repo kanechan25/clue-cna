@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import { toast } from 'react-toastify'
 import { NotesStore, Note, User, EditOperation, Conflict, ConflictResolution } from '@/models/notes'
 import { createMockNotes, MOCK_USERS, randomCommentText } from '@/constants/mockData'
-import { debouncedSave, createMemoizedSelector, clearSelectorsCache } from '@/utils/store'
+import { debouncedSave, clearSelectorsCache } from '@/utils/store'
 
 const STORAGE_KEY = 'collaborative-notes-app'
 const CLEANUP_INTERVAL = 60 * 1000 * 2
@@ -33,7 +33,6 @@ export const defaultInitState: NotesStore = {
   addCollaborator: () => {},
   removeCollaborator: () => {},
   setSearchQuery: () => {},
-  getFilteredNotes: () => [],
   saveToLocalStorage: () => {},
   loadFromLocalStorage: () => {},
   clearOldOperations: () => {},
@@ -284,27 +283,8 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
         toast.info(`${user?.name} removed from collaborators`)
       },
 
-      // Search and filters - Optimized with memoization
       setSearchQuery: (query: string) => {
         set(() => ({ searchQuery: query }))
-        // Clear cache when search query changes
-        clearSelectorsCache()
-      },
-
-      getFilteredNotes: () => {
-        const { notes, searchQuery } = get()
-
-        // Use memoized selector for better performance
-        const memoizedFilter = createMemoizedSelector((state: any) => {
-          if (!state.searchQuery.trim()) return state.notes
-
-          const query = state.searchQuery.toLowerCase()
-          return state.notes.filter(
-            (note: Note) => note.title.toLowerCase().includes(query) || note.content.toLowerCase().includes(query),
-          )
-        }, `filtered-notes-${searchQuery}`)
-
-        return memoizedFilter({ notes, searchQuery })
       },
 
       // Persistence

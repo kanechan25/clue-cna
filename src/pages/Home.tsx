@@ -24,12 +24,24 @@ export const Home: React.FC = () => {
   const navigate = useNavigate()
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
-  // Clean store selectors - Zustand handles optimization
-  const notes = useNotesStore((state) => state.getFilteredNotes())
+  // Get raw data from store - these selectors return stable references
+  const allNotes = useNotesStore((state) => state.notes)
   const searchQuery = useNotesStore((state) => state.searchQuery)
   const users = useNotesStore((state) => state.users)
   const currentUser = useNotesStore((state) => state.currentUser)
   const isLoading = useNotesStore((state) => state.isLoading)
+
+  // Filter notes in component with memoization - prevents infinite loops
+  const notes = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return allNotes
+    }
+
+    const query = searchQuery.toLowerCase()
+    return allNotes.filter(
+      (note) => note.title.toLowerCase().includes(query) || note.content.toLowerCase().includes(query),
+    )
+  }, [allNotes, searchQuery])
 
   // Store actions - already stable references
   const setSearchQuery = useNotesStore((state) => state.setSearchQuery)
@@ -69,10 +81,13 @@ export const Home: React.FC = () => {
     [notes],
   )
 
-  // Simple handlers - no memoization needed
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value)
-  }
+  // Simple search handler - no complex debouncing needed
+  const handleSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchQuery(event.target.value)
+    },
+    [setSearchQuery],
+  )
 
   const handleCreateNote = (title: string, content: string) => {
     createNote(title, content)
@@ -127,7 +142,7 @@ export const Home: React.FC = () => {
           <Typography variant='h3' component='h1' gutterBottom sx={{ fontWeight: 600 }}>
             My Notes
           </Typography>
-          <Typography variant='body1' color='text.secondary' paragraph>
+          <Typography variant='body1' color='text.secondary' sx={{ mb: 2 }}>
             {welcomeMessage}
           </Typography>
         </Box>
@@ -143,7 +158,7 @@ export const Home: React.FC = () => {
                 <Typography variant='h5' gutterBottom color='text.secondary'>
                   No notes yet
                 </Typography>
-                <Typography variant='body1' color='text.secondary' paragraph>
+                <Typography variant='body1' color='text.secondary' sx={{ mb: 2 }}>
                   Create your first note to get started with collaborative editing!
                 </Typography>
                 <Button variant='contained' size='large' startIcon={<AddIcon />} onClick={handleOpenCreateDialog}>
