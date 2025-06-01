@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import { toast } from 'react-toastify'
 import { NotesStore, Note, User, EditOperation, Conflict, ConflictResolution } from '@/models/notes'
 import { createMockNotes, MOCK_USERS, randomCommentText } from '@/constants/mockData'
+import { debouncedSave, createMemoizedSelector, clearSelectorsCache } from '@/utils/store'
 
 const STORAGE_KEY = 'collaborative-notes-app'
 const CLEANUP_INTERVAL = 60 * 1000 * 2
@@ -63,7 +64,7 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
           currentNote: newNote,
         }))
 
-        get().saveToLocalStorage()
+        debouncedSave(() => get().saveToLocalStorage())
         toast.success(`Note "${title}" created successfully!`)
       },
 
@@ -89,7 +90,7 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
           }
         })
 
-        get().saveToLocalStorage()
+        debouncedSave(() => get().saveToLocalStorage())
       },
 
       deleteNote: (id: string) => {
@@ -121,7 +122,6 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
           editOperations: [newOperation, ...state.editOperations.slice(0, MAX_HISTORY - 1)],
         }))
 
-        // Only check for conflicts if not skipped
         if (!skipConflictCheck) {
           setTimeout(() => get().checkForConflicts(newOperation), 0)
         }
@@ -211,10 +211,9 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
       },
 
       simulateMultipleEdits: (noteId: string, baseContent: string) => {
+        // TODO: create edit operations from different users
         const availableUsers = MOCK_USERS.filter((user) => user.id !== get().currentUser?.id)
         if (availableUsers.length === 0) return
-
-        // TODO: Create edit operations from different users, just only people who belongs to active collaborations
         const numberOfEdits = 3
         const allOperations: EditOperation[] = []
         let finalContent = baseContent
@@ -236,7 +235,7 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
                 version: get().notes.find((n) => n.id === noteId)?.version || 1,
               },
               true,
-            ) // Skip immediate conflict check
+            )
 
             allOperations.push(operation)
 
@@ -244,11 +243,6 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
             finalContent += editComment
             get().updateNote(noteId, {
               content: finalContent,
-            })
-
-            toast.info(`${randomUser.name} made changes to the note`, {
-              position: 'bottom-left',
-              autoClose: 2000,
             })
 
             // Only check for conflicts after the last operation
@@ -290,19 +284,27 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
         toast.info(`${user?.name} removed from collaborators`)
       },
 
-      // Search and filters
+      // Search and filters - Optimized with memoization
       setSearchQuery: (query: string) => {
         set(() => ({ searchQuery: query }))
+        // Clear cache when search query changes
+        clearSelectorsCache()
       },
 
       getFilteredNotes: () => {
         const { notes, searchQuery } = get()
-        if (!searchQuery.trim()) return notes
 
-        const query = searchQuery.toLowerCase()
-        return notes.filter(
-          (note) => note.title.toLowerCase().includes(query) || note.content.toLowerCase().includes(query),
-        )
+        // Use memoized selector for better performance
+        const memoizedFilter = createMemoizedSelector((state: any) => {
+          if (!state.searchQuery.trim()) return state.notes
+
+          const query = state.searchQuery.toLowerCase()
+          return state.notes.filter(
+            (note: Note) => note.title.toLowerCase().includes(query) || note.content.toLowerCase().includes(query),
+          )
+        }, `filtered-notes-${searchQuery}`)
+
+        return memoizedFilter({ notes, searchQuery })
       },
 
       // Persistence
@@ -365,6 +367,9 @@ export const createNotesStore = (initState: Partial<NotesStore> = {}) => {
             (conflict) => !conflict.resolvedAt || dayjs(conflict.resolvedAt).isAfter(oneHourAgo),
           ),
         }))
+
+        // Clear selector cache periodically
+        clearSelectorsCache()
       },
     })),
   )

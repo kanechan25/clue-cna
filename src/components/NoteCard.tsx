@@ -28,47 +28,80 @@ dayjs.extend(relativeTime)
 
 const MAX_PREVIEW_LENGTH = 250
 
-// Lazy load the NoteEditorPage component
 const lazyLoadNoteEditor = () => import('@/pages/NoteEditorPage').then((module) => module.NoteEditorPage)
 
-// just preview MAX_PREVIEW_LENGTH characters of HTML content
-const truncateHtmlContent = (html: string, maxLength: number = MAX_PREVIEW_LENGTH): string => {
-  const tempDiv = document.createElement('div')
-  tempDiv.innerHTML = html
-  const textContent = tempDiv.textContent || tempDiv.innerText || ''
+// Optimized HTML truncation with memoization and improved DOM handling
+const createTruncationCache = () => {
+  const cache = new Map()
+  const MAX_CACHE_SIZE = 100
 
-  if (textContent.length <= maxLength) {
-    return html
+  return {
+    get: (key: string) => cache.get(key),
+    set: (key: string, value: string) => {
+      if (cache.size >= MAX_CACHE_SIZE) {
+        const firstKey = cache.keys().next().value
+        cache.delete(firstKey)
+      }
+      cache.set(key, value)
+    },
+    clear: () => cache.clear(),
   }
-
-  const truncatedText = textContent.slice(0, maxLength)
-  const lastSpaceIndex = truncatedText.lastIndexOf(' ')
-  const finalLength = lastSpaceIndex > 0 ? lastSpaceIndex : maxLength
-
-  return textContent.slice(0, finalLength) + '...'
 }
 
-const NoteCard = React.memo<{
+const truncationCache = createTruncationCache()
+
+// Optimized truncation function with caching and performance improvements
+const truncateHtmlContent = (html: string, maxLength: number = MAX_PREVIEW_LENGTH): string => {
+  const cacheKey = `${html.substring(0, 50)}-${maxLength}`
+  const cached = truncationCache.get(cacheKey)
+  if (cached) return cached
+
+  // Use DocumentFragment for better performance
+  const fragment = document.createDocumentFragment()
+  const tempDiv = document.createElement('div')
+  fragment.appendChild(tempDiv)
+  tempDiv.innerHTML = html
+
+  const textContent = tempDiv.textContent || tempDiv.innerText || ''
+
+  let result: string
+  if (textContent.length <= maxLength) {
+    result = html
+  } else {
+    const truncatedText = textContent.slice(0, maxLength)
+    const lastSpaceIndex = truncatedText.lastIndexOf(' ')
+    const finalLength = lastSpaceIndex > 0 ? lastSpaceIndex : maxLength
+    result = textContent.slice(0, finalLength) + '...'
+  }
+
+  truncationCache.set(cacheKey, result)
+  return result
+}
+
+interface NoteCardProps {
   note: Note
   onEdit: (note: Note) => void
   onDelete: (id: string) => void
   onShare: (id: string) => void
   users: Array<{ id: string; name: string; color: string }>
-}>(({ note, onEdit, onDelete, onShare, users }) => {
+}
+
+const NoteCard = React.memo<NoteCardProps>(({ note, onEdit, onDelete, onShare, users }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [isLazyLoading, setIsLazyLoading] = useState<boolean>(false)
   const open = Boolean(anchorEl)
 
-  const handleMenuClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+  // Simple handlers - no memoization needed for DOM events
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation()
     setAnchorEl(event.currentTarget)
-  }, [])
+  }
 
-  const handleMenuClose = useCallback(() => {
+  const handleMenuClose = () => {
     setAnchorEl(null)
-  }, [])
+  }
 
-  const handleEdit = useCallback(async () => {
+  const handleEdit = async () => {
     if (isLazyLoading) return
 
     // Only lazy load if this is a large note
@@ -96,18 +129,19 @@ const NoteCard = React.memo<{
     }
 
     handleMenuClose()
-  }, [note, onEdit, handleMenuClose, isLazyLoading])
+  }
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = () => {
     onDelete(note.id)
     handleMenuClose()
-  }, [note.id, onDelete, handleMenuClose])
+  }
 
-  const handleShare = useCallback(() => {
+  const handleShare = () => {
     onShare(note.id)
     handleMenuClose()
-  }, [note.id, onShare, handleMenuClose])
+  }
 
+  // Keep expensive operations memoized
   const collaborators = useMemo(
     () => users.filter((user) => note.collaborators.includes(user.id)),
     [users, note.collaborators],
@@ -117,43 +151,65 @@ const NoteCard = React.memo<{
     return truncateHtmlContent(note.content, MAX_PREVIEW_LENGTH)
   }, [note.content])
 
+  // Simple computations - no memoization needed
   const isHtmlContent = note.content.includes('<') && note.content.includes('>')
+  const formattedDate = dayjs(note.createdAt).format('DD/MM/YYYY HH:mm:ss')
+
+  // Simple style objects - no memoization needed
+  const cardStyles = {
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    cursor: isLazyLoading ? 'wait' : 'pointer',
+    position: 'relative',
+    transition: 'all 0.2s ease-in-out',
+    opacity: isLazyLoading ? 0.8 : 1,
+    '&:hover': {
+      transform: isLazyLoading ? 'none' : 'scale(1.05)',
+      boxShadow: isLazyLoading ? 1 : 4,
+    },
+  }
+
+  const loadingOverlayStyles = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    zIndex: 10,
+    borderRadius: 1,
+  }
+
+  const titleStyles = {
+    fontWeight: 600,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
+    lineHeight: 1.3,
+    flex: 1,
+  }
+
+  const previewTextStyles = {
+    mb: 2,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: '-webkit-box',
+    WebkitLineClamp: 3,
+    WebkitBoxOrient: 'vertical',
+    lineHeight: 1.5,
+  }
 
   return (
-    <Card
-      sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        cursor: isLazyLoading ? 'wait' : 'pointer',
-        position: 'relative',
-        transition: 'all 0.2s ease-in-out',
-        opacity: isLazyLoading ? 0.8 : 1,
-        '&:hover': {
-          transform: isLazyLoading ? 'none' : 'scale(1.05)',
-          boxShadow: isLazyLoading ? 1 : 4,
-        },
-      }}
-      onClick={handleEdit}
-    >
-      {/* Loading overlay */}
+    <Card sx={cardStyles} onClick={handleEdit}>
       {isLazyLoading && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            zIndex: 10,
-            borderRadius: 1,
-          }}
-        >
+        <Box sx={loadingOverlayStyles}>
           <CircularProgress size={32} />
           <Typography variant='caption' sx={{ mt: 1, color: 'text.secondary' }}>
             Loading...
@@ -163,20 +219,7 @@ const NoteCard = React.memo<{
 
       <CardContent sx={{ flexGrow: 1, pb: 1 }}>
         <Box display='flex' justifyContent='space-between' alignItems='flex-start' mb={1}>
-          <Typography
-            variant='h6'
-            component='h3'
-            sx={{
-              fontWeight: 600,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              lineHeight: 1.3,
-              flex: 1,
-            }}
-          >
+          <Typography variant='h6' component='h3' sx={titleStyles}>
             {note.title}
             {note.isLargeNote && (
               <Chip
@@ -196,19 +239,7 @@ const NoteCard = React.memo<{
         {isHtmlContent ? (
           <RenderNote previewContent={previewContent} />
         ) : (
-          <Typography
-            variant='body2'
-            color='text.secondary'
-            sx={{
-              mb: 2,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-              lineHeight: 1.5,
-            }}
-          >
+          <Typography variant='body2' color='text.secondary' sx={previewTextStyles}>
             {previewContent}
           </Typography>
         )}
@@ -216,7 +247,7 @@ const NoteCard = React.memo<{
         <Box display='flex' alignItems='center' gap={1} mb={1}>
           <ScheduleIcon fontSize='small' color='action' />
           <Typography variant='caption' color='text.secondary'>
-            {dayjs(note.createdAt).format('DD/MM/YYYY HH:mm:ss')}
+            {formattedDate}
           </Typography>
         </Box>
 

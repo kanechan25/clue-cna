@@ -239,8 +239,10 @@ export const NoteEditorPage: React.FC = () => {
                 fontWeight: 500,
               },
             }}
-            InputProps={{
-              disableUnderline: true,
+            slotProps={{
+              input: {
+                disableUnderline: true,
+              },
             }}
           />
 

@@ -10,28 +10,34 @@ import NoteCard from '@/components/NoteCard'
 import CreateNoteModal from '@/components/CreateNoteModal'
 import Header from '@/components/Header'
 
+const GRID_STYLES = {
+  display: 'grid',
+  gridTemplateColumns: {
+    xs: '1fr',
+    sm: 'repeat(2, 1fr)',
+    md: 'repeat(3, 1fr)',
+  },
+  gap: 3,
+}
+
 export const Home: React.FC = () => {
   const navigate = useNavigate()
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
+  // Clean store selectors - Zustand handles optimization
   const notes = useNotesStore((state) => state.getFilteredNotes())
   const searchQuery = useNotesStore((state) => state.searchQuery)
   const users = useNotesStore((state) => state.users)
   const currentUser = useNotesStore((state) => state.currentUser)
   const isLoading = useNotesStore((state) => state.isLoading)
 
+  // Store actions - already stable references
   const setSearchQuery = useNotesStore((state) => state.setSearchQuery)
   const createNote = useNotesStore((state) => state.createNote)
   const deleteNote = useNotesStore((state) => state.deleteNote)
   const setCurrentNote = useNotesStore((state) => state.setCurrentNote)
 
-  const handleSearchChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchQuery(event.target.value)
-    },
-    [setSearchQuery],
-  )
-
+  // Only memoize handlers passed to React.memo child components (NoteCard)
   const handleEditNote = useCallback(
     (note: Note) => {
       setCurrentNote(note)
@@ -63,13 +69,19 @@ export const Home: React.FC = () => {
     [notes],
   )
 
-  const handleCreateNote = useCallback(
-    (title: string, content: string) => {
-      createNote(title, content)
-    },
-    [createNote],
-  )
+  // Simple handlers - no memoization needed
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value)
+  }
 
+  const handleCreateNote = (title: string, content: string) => {
+    createNote(title, content)
+  }
+
+  const handleOpenCreateDialog = () => setCreateDialogOpen(true)
+  const handleCloseCreateDialog = () => setCreateDialogOpen(false)
+
+  // Only memoize expensive calculations
   const notesStats = useMemo(() => {
     const totalNotes = notes.length
     const collaborativeNotes = notes.filter((note) => note.collaborators.length > 1).length
@@ -78,6 +90,19 @@ export const Home: React.FC = () => {
     return { totalNotes, collaborativeNotes, recentNotes }
   }, [notes])
 
+  // Simple string building - no memoization needed
+  const { totalNotes, collaborativeNotes, recentNotes } = notesStats
+  let welcomeMessage = `Welcome back, ${currentUser?.name}! You have ${totalNotes} notes`
+
+  if (collaborativeNotes > 0) {
+    welcomeMessage += `, ${collaborativeNotes} collaborative`
+  }
+
+  if (recentNotes > 0) {
+    welcomeMessage += `, ${recentNotes} updated this week.`
+  }
+
+  // Loading state
   if (isLoading) {
     return (
       <Container maxWidth='lg' sx={{ py: 4 }}>
@@ -85,17 +110,7 @@ export const Home: React.FC = () => {
           <Skeleton variant='text' width={300} height={60} />
           <Skeleton variant='text' width={200} height={30} />
         </Box>
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: {
-              xs: '1fr',
-              sm: 'repeat(2, 1fr)',
-              md: 'repeat(3, 1fr)',
-            },
-            gap: 3,
-          }}
-        >
+        <Box sx={GRID_STYLES}>
           {Array.from({ length: 6 }).map((_, index) => (
             <Skeleton key={index} variant='rectangular' height={200} />
           ))}
@@ -106,22 +121,17 @@ export const Home: React.FC = () => {
 
   return (
     <div className='flex flex-col min-h-screen w-full'>
-      <Header
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        onNewNoteClick={() => setCreateDialogOpen(true)}
-      />
+      <Header searchQuery={searchQuery} onSearchChange={handleSearchChange} onNewNoteClick={handleOpenCreateDialog} />
       <Container maxWidth='lg' sx={{ py: 4, flex: 1, width: '100%' }}>
         <Box mb={4}>
           <Typography variant='h3' component='h1' gutterBottom sx={{ fontWeight: 600 }}>
             My Notes
           </Typography>
           <Typography variant='body1' color='text.secondary' paragraph>
-            Welcome back, {currentUser?.name}! You have {notesStats.totalNotes} notes
-            {notesStats.collaborativeNotes > 0 && `, ${notesStats.collaborativeNotes} collaborative`}
-            {notesStats.recentNotes > 0 && `, ${notesStats.recentNotes} updated this week`}.
+            {welcomeMessage}
           </Typography>
         </Box>
+
         {notes?.length === 0 ? (
           <Box textAlign='center' py={8}>
             {searchQuery ? (
@@ -136,29 +146,14 @@ export const Home: React.FC = () => {
                 <Typography variant='body1' color='text.secondary' paragraph>
                   Create your first note to get started with collaborative editing!
                 </Typography>
-                <Button
-                  variant='contained'
-                  size='large'
-                  startIcon={<AddIcon />}
-                  onClick={() => setCreateDialogOpen(true)}
-                >
+                <Button variant='contained' size='large' startIcon={<AddIcon />} onClick={handleOpenCreateDialog}>
                   Create Your First Note
                 </Button>
               </div>
             )}
           </Box>
         ) : (
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: 'repeat(2, 1fr)',
-                md: 'repeat(3, 1fr)',
-              },
-              gap: 3,
-            }}
-          >
+          <Box sx={GRID_STYLES}>
             {notes?.map((note) => (
               <NoteCard
                 key={note.id}
@@ -171,6 +166,7 @@ export const Home: React.FC = () => {
             ))}
           </Box>
         )}
+
         <Fab
           color='primary'
           aria-label='add note'
@@ -180,16 +176,12 @@ export const Home: React.FC = () => {
             right: 16,
             display: { xs: 'flex', sm: 'none' },
           }}
-          onClick={() => setCreateDialogOpen(true)}
+          onClick={handleOpenCreateDialog}
         >
           <AddIcon />
         </Fab>
 
-        <CreateNoteModal
-          open={createDialogOpen}
-          onClose={() => setCreateDialogOpen(false)}
-          onSubmit={handleCreateNote}
-        />
+        <CreateNoteModal open={createDialogOpen} onClose={handleCloseCreateDialog} onSubmit={handleCreateNote} />
       </Container>
     </div>
   )

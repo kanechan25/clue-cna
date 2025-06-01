@@ -1,299 +1,433 @@
 # CLUE - Collaborative Notes App
 
-A modern, real-time collaborative note-taking application built with React, TypeScript, Zustand, and Material-UI. This app allows multiple users to create, edit, and share notes simultaneously with conflict resolution and real-time updates.
+A modern, real-time collaborative note-taking application built with React 19, TypeScript, Zustand, Material-UI, and Tiptap rich text editor. This app allows multiple users to create, edit, and share notes simultaneously with intelligent conflict resolution and seamless real-time collaboration simulation.
 
 ## ✨ Features
 
 ### 🏠 Home Screen
 
-- **📝 Note List**: Display all user-created notes with timestamps and preview
-- **🔍 Real-time Search**: Search notes by title and content
-- **➕ Quick Create**: Create new notes with title and content
-- **🗑️ Delete & Share**: Manage notes with context menu actions
-- **👥 Collaborator Indicators**: See who's working on each note
-- **📱 Responsive Design**: Optimized for mobile, tablet, and desktop
+- **📝 Note Gallery**: Beautiful card-based display of all notes with rich content previews
+- **🔍 Real-time Search**: Instant search across note titles and content with live filtering
+- **➕ Quick Creation**: Create new notes with rich text content using modal dialog
+- **🔗 Share Functionality**: Copy shareable links to clipboard for easy note sharing
+- **🗑️ Note Management**: Delete notes with confirmation and context menu actions
+- **👥 Collaborator Visualization**: See active collaborators with colored avatars
+- **🏷️ Large Note Indicators**: Visual badges for notes requiring lazy loading
+- **📱 Responsive Design**: Fully optimized for mobile, tablet, and desktop with touch gestures
 
-### ✏️ Note Editor
+### ✏️ Note Editor (Tiptap Rich Text)
 
-- **🎨 Rich Text Formatting**: Bold, italic, underline, lists
-- **⌨️ Keyboard Shortcuts**: Ctrl+B, Ctrl+I, Ctrl+U, Ctrl+S
-- **💾 Auto-save**: Automatic saving every second of inactivity
-- **👥 Real-time Collaboration**: Multiple users can edit simultaneously
-- **⚡ Conflict Resolution**: Automatic detection and resolution of editing conflicts
-- **🏷️ Version Control**: Track note versions and edit history
+- **🎨 Rich Text Formatting**: Full WYSIWYG editor with bold, italic, underline, bullet lists, numbered lists
+- **🔧 Interactive Toolbar**: Visual formatting toolbar with undo/redo functionality
+- **⌨️ Keyboard Shortcuts**: Standard shortcuts (Ctrl+B, Ctrl+I, Ctrl+U) for power users
+- **💾 Auto-save**: Intelligent auto-save every 1 second with save status indicators
+- **📝 Live Title Editing**: Edit note titles directly in the editor header
+- **🔄 Version Control**: Automatic version tracking with timestamps and user attribution
+- **📐 Adaptive Layout**: Responsive editor that works seamlessly across all devices
 
-### 🎨 User Experience
+### 🤝 Advanced Collaboration
 
-- **🌓 Dark/Light Theme**: Toggle between themes with smooth transitions
-- **📱 Mobile-First**: Responsive design with touch-friendly interfaces
-- **🚀 Performance Optimized**: Memoization, lazy loading, and efficient re-renders
-- **💾 Local Storage**: Persistent data storage in browser
-- **🔔 Toast Notifications**: Real-time feedback for user actions
+- **👥 Multi-user Simulation**: Realistic collaborative editing simulation with multiple mock users
+- **⚡ Smart Conflict Detection**: Intelligent conflict detection within 5-second windows
+- **🎯 Manual Conflict Resolution**: Interactive conflict resolution with user choice selection
+- **🔄 Auto-resolve Options**: One-click auto-resolution with latest-wins strategy
+- **📊 Operation Tracking**: Comprehensive edit operation logging with timestamps and user attribution
+- **🧹 Performance Optimization**: Automatic cleanup of old operations and conflicts
+- **👁️ Visual Collaborator Presence**: Real-time collaborator avatars with active status indicators
 
-### 🤝 Collaboration Features
+### 🚀 Performance & UX
 
-- **👥 Multi-user Support**: Simulate collaborative editing
-- **🎯 Conflict Detection**: Real-time conflict detection within 5 seconds
-- **🔄 Auto-resolution**: Latest-wins and auto-merge strategies
-- **📊 Operation Tracking**: Track all edit operations with timestamps
-- **🧹 Performance Cleanup**: Automatic cleanup of old operations
+- **⚡ Lazy Loading**: Conditional lazy loading for large notes with visual loading indicators
+- **🌓 Theme Support**: Complete dark/light theme switching with smooth transitions
+- **💾 Local Persistence**: Reliable localStorage integration with data recovery
+- **🔔 Toast Notifications**: Real-time user feedback for all actions with contextual messages
+- **📱 Mobile-First**: Touch-optimized interface with gesture support
+- **🔍 Direct URL Access**: Deep linking support - navigate directly to notes via URLs
+- **⚡ React Optimizations**: Comprehensive memoization, useCallback, and useMemo implementation
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
-- pnpm (recommended) or npm
+- **Node.js** 18+ (LTS recommended)
+- **pnpm** (recommended) or npm/yarn
+- Modern web browser with localStorage support
 
 ### Installation
 
 1. **Clone the repository**
 
-```bash
-git clone https://github.com/kanechan25/clue-cna.git
-cd clue-cna
-```
+   ```bash
+   git clone https://github.com/kanechan25/clue-cna.git
+   cd clue-cna
+   ```
 
 2. **Install dependencies**
 
-```bash
-pnpm install
-```
+   ```bash
+   pnpm install
+   ```
 
 3. **Start development server**
 
-```bash
-pnpm dev
-```
+   ```bash
+   pnpm dev
+   ```
 
 4. **Open in browser**
-   Navigate to `http://localhost:5178`
+   ```
+   http://localhost:5178
+   ```
 
-### Available Scripts
+### Available Commands
 
 ```bash
 # Development
-pnpm dev              # Start development server
+pnpm dev              # Start development server on port 5178
 pnpm build            # Build for production
-pnpm preview          # Preview production build
+pnpm preview          # Preview production build locally
 
 # Code Quality
-pnpm lint             # Run ESLint
+pnpm lint             # Run ESLint with TypeScript rules
 pnpm format           # Format code with Prettier
-pnpm format:check     # Check code formatting
+pnpm format:check     # Check code formatting without changes
 
 # Testing
-pnpm test             # Run tests
-pnpm test:ui          # Run tests with UI
-pnpm test:coverage    # Run tests with coverage
+pnpm test             # Run Vitest unit tests
+pnpm test:ui          # Run tests with interactive UI
+pnpm test:coverage    # Generate test coverage reports
 pnpm test:watch       # Run tests in watch mode
 ```
 
-## 🏗️ Architecture
+## 🏗️ Architecture Overview
 
-### 🗂️ Project Structure
+### 📁 Project Structure
 
 ```
 src/
-├── components/          # Reusable UI components
-│   ├── Header.tsx      # App header with navigation
-│   ├── NoteCard.tsx    # Note display card
-│   └── CreateNoteModal.tsx
-├── pages/              # Main application pages
-│   ├── Home.tsx        # Notes list page
-│   └── NoteEditorPage.tsx # Note editing page
-├── stores/             # Zustand state management
-│   └── notes.ts        # Notes store with collaboration logic
-├── models/             # TypeScript type definitions
-│   └── notes.ts        # Note, User, and operation types
-├── provider/           # React context providers
-│   ├── notesProvider.tsx    # Notes state provider
-│   └── themeProvider.tsx    # Theme context provider
-├── hooks/              # Custom React hooks
-├── services/           # API and external services
-├── test/               # Test files
-└── assets/             # Static assets
+├── components/              # Reusable UI components
+│   ├── Header.tsx          # App header with search and navigation
+│   ├── NoteCard.tsx        # Note display cards with lazy loading
+│   ├── CreateNoteModal.tsx # Rich text note creation modal
+│   ├── ConflictModal.tsx   # Intelligent conflict resolution UI
+│   ├── TiptapEditor.tsx    # Rich text editor with formatting
+│   ├── CollaborativeEditor.tsx # Collaborative editing wrapper
+│   └── RenderNote.tsx      # HTML content renderer
+├── pages/                  # Main application pages
+│   ├── Home.tsx           # Notes listing and search page
+│   └── NoteEditorPage.tsx # Full-featured note editing interface
+├── stores/                 # Zustand state management
+│   └── notes.ts           # Complete notes store with collaboration logic
+├── models/                 # TypeScript type definitions
+│   └── notes.ts           # Interfaces for Note, User, EditOperation, Conflict
+├── constants/              # Application constants
+│   └── mockData.ts        # Mock users and initial notes data
+├── provider/               # React context providers
+│   ├── notesProvider.tsx  # Notes state provider wrapper
+│   └── themeProvider.tsx  # Material-UI theme provider
+├── utils/                  # Utility functions
+│   └── index.ts           # Helper functions for content processing
+└── hooks/                  # Custom React hooks
+    └── index.ts           # Reusable hooks (future extensibility)
 ```
 
 ### 🔧 Technology Stack
 
-**Frontend Framework**
+**Core Framework**
 
-- **React 19** - Modern React with latest features
-- **TypeScript 5.7** - Type safety and developer experience
-- **Vite 6** - Fast build tool and dev server
+- **React 19** - Latest React with concurrent features and optimizations
+- **TypeScript 5.7** - Strict type safety with advanced inference
+- **Vite 6** - Lightning-fast development with HMR and optimized builds
 
 **UI & Styling**
 
-- **Material-UI 7** - Comprehensive component library
-- **Emotion** - CSS-in-JS styling solution
-- **Responsive Design** - Mobile-first approach
+- **Material-UI 7** - Complete design system with theming
+- **TailwindCSS 4** - Utility-first CSS with custom configuration
+- **Emotion** - CSS-in-JS with theme integration
+- **Tiptap 2.12** - Extensible rich text editor built on ProseMirror
 
-**State Management**
+**State & Data Management**
 
-- **Zustand 5** - Lightweight state management
-- **Vanilla Store** - For provider pattern implementation
-- **Local Storage** - Persistent data storage
+- **Zustand 5** - Lightweight state management with subscriptions
+- **React Query 5** - Server state management (ready for future API integration)
+- **dayjs** - Modern date manipulation and formatting
+- **Local Storage** - Client-side persistence with error handling
 
-**Development Tools**
+**Developer Experience**
 
-- **ESLint** - Code linting and quality
-- **Prettier** - Code formatting
-- **Vitest** - Fast unit testing
-- **Testing Library** - Component testing utilities
+- **ESLint** - Code quality with TypeScript and React rules
+- **Prettier** - Consistent code formatting
+- **Husky** - Git hooks for code quality enforcement
+- **Vitest** - Fast unit testing with coverage reports
 
-## 🎯 Usage Guide
+## 🎯 Detailed Usage Guide
 
-### Creating Notes
+### Creating Your First Note
 
-1. Click the "New Note" button in the header
-2. Enter a title and optional content
-3. Click "Create" to save the note
-4. The note appears in your notes list
+1. **From the Header**: Click the "New Note" button in the top navigation
+2. **From FAB (Mobile)**: Use the floating action button on mobile devices
+3. **From Empty State**: Click "Create Your First Note" when no notes exist
 
-### Editing Notes
+**Rich Text Creation Process:**
 
-1. Click on any note card to open the editor
-2. Edit the title directly in the header
-3. Use the formatting toolbar for rich text
-4. Changes auto-save every second
-5. Use keyboard shortcuts for quick formatting
+- Enter a descriptive title
+- Use the Tiptap editor for rich content:
+  - **Bold**: Ctrl+B or toolbar button
+  - **Italic**: Ctrl+I or toolbar button
+  - **Underline**: Ctrl+U or toolbar button
+  - **Bullet Lists**: Toolbar button or typing "- "
+  - **Numbered Lists**: Toolbar button or typing "1. "
+  - **Undo/Redo**: Toolbar buttons or Ctrl+Z/Ctrl+Y
 
-### Collaboration Simulation
+### Advanced Note Editing
 
-1. Open a note in the editor
-2. Click "Simulate Collaborator" to see real-time editing
-3. Conflicts are automatically detected and resolved
-4. See collaborator avatars and activity indicators
+1. **Direct Access**: Type URLs like `/note/note-1` for instant navigation
+2. **Lazy Loading**: Large notes show loading spinner before opening
+3. **Auto-save**: Changes save automatically after 1 second of inactivity
+4. **Save Status**: Visual indicators show "saving" → "auto saved" status
+5. **Version Tracking**: Each edit increments version number with timestamps
 
-### Theme Switching
+### Collaboration Features
 
-- Click the theme toggle button in the header
-- Switches between light and dark modes
-- Preference is remembered for your session
+**Simulating Real-time Collaboration:**
 
-## 🔧 Configuration
+1. Open any note in the editor
+2. Click "Simulate Collaboration" button
+3. Watch multiple users make simultaneous edits
+4. Observe conflict detection and resolution options
 
-### Customizing Mock Data
+**Managing Collaborators:**
 
-Edit `src/model/mockData.ts` to modify:
+1. Click the "People" icon in the editor toolbar
+2. Add new collaborators from the user list
+3. Remove existing collaborators as needed
+4. See active collaborator avatars with status indicators
 
-- Initial notes content
-- Mock users and colors
+**Conflict Resolution:**
 
-## 🧪 Testing
+- **Automatic Detection**: Conflicts detected within 5-second windows
+- **Manual Resolution**: Choose which user's edit to keep
+- **Auto-resolve**: One-click resolution using latest edit
+- **Visual Preview**: See full content of conflicting edits before choosing
 
-The app includes comprehensive tests for key components and functionality:
+### Sharing & Organization
+
+**Share Notes:**
+
+1. Click the "⋮" menu on any note card
+2. Select "Share" to copy link to clipboard
+3. Share the URL with collaborators for instant access
+
+**Search & Filter:**
+
+- Use the search bar for real-time filtering
+- Search works across both titles and content
+- Results update instantly as you type
+- Clear search to return to full note list
+
+### Advanced Features
+
+**Large Note Performance:**
+
+- Notes marked as "Large note" trigger lazy loading
+- Visual loading indicators during component loading
+- Optimized for heavy content and complex formatting
+
+**Theme Switching:**
+
+- Toggle between light and dark themes
+- Preference persisted across browser sessions
+- Smooth transitions and consistent color schemes
+
+**Direct URL Navigation:**
+
+- Bookmark specific notes with URLs like `/note/note-id`
+- Share direct links to specific notes
+- Automatic redirection if note doesn't exist
+
+## 🔧 Configuration & Customization
+
+### Mock Data Configuration
+
+Edit `src/constants/mockData.ts` to customize:
+
+**Users Configuration:**
+
+```typescript
+export const MOCK_USERS: User[] = [
+  {
+    id: 'user-1',
+    name: 'Your Name',
+    color: '#1976d2',
+    isActive: true,
+    lastActivity: new Date().toISOString(),
+  },
+  // Add more users...
+]
+```
+
+**Initial Notes:**
+
+```typescript
+export const createMockNotes = (): Note[] => [
+  {
+    id: 'note-1',
+    title: 'Your Note Title',
+    content: `<p>Rich HTML content here</p>`,
+    isLargeNote: false, // Set to true for lazy loading
+    // ... other properties
+  },
+]
+```
+
+**Collaboration Messages:**
+
+```typescript
+export const randomCommentText = [
+  'Your custom collaboration message',
+  'Add context-specific suggestions',
+  // ... more messages
+]
+```
+
+## 🧪 Testing & Quality Assurance
+
+### Running Tests
 
 ```bash
 # Run all tests
 pnpm test
 
-# Run specific test file
-pnpm test Header.test.tsx
+# Run tests with UI
+pnpm test:ui
 
-# Run tests with coverage
+# Generate coverage report
 pnpm test:coverage
+
+# Watch mode for development
+pnpm test:watch
 ```
 
-**Test Coverage Includes:**
+### Test Coverage Areas
 
-- Component rendering and interaction
-- User event handling
-- State management and updates
-- Search and filtering functionality
-- Theme switching
-- Responsive design elements
+- **Component Rendering**: All major components tested for proper rendering
+- **User Interactions**: Event handlers, form submissions, and navigation
+- **State Management**: Zustand store actions and state updates
+- **Search Functionality**: Real-time filtering and query handling
+- **Collaboration Logic**: Conflict detection and resolution flows
+- **Performance Features**: Lazy loading and memoization effectiveness
 
-## 🎨 Design System
+### Code Quality Tools
 
-### Color Palette
+**ESLint Configuration:**
 
-- **Primary**: Blue (#1976d2) - Actions and links
-- **Secondary**: Green (#388e3c) - Success states
-- **Background**: Adaptive based on theme
-- **Text**: High contrast for accessibility
+- TypeScript strict rules
+- React hooks validation
+- Prettier integration
+- Custom naming conventions
 
-### Typography
+**Git Hooks (Husky):**
 
-- **Font Family**: Roboto, Helvetica, Arial
-- **Headings**: Weight 500-600, responsive sizing
-- **Body Text**: 1rem base with 1.5 line height
-
-### Component Guidelines
-
-- **Cards**: 12px border radius with elevation
-- **Buttons**: 8px border radius, no text transform
-- **Forms**: Consistent spacing and validation
-- **Responsive**: Mobile-first breakpoints
+- Pre-commit formatting
+- Pre-commit linting
+- Prevents commits with errors
 
 ## 🚀 Performance Optimizations
 
 ### React Optimizations
 
-- **React.memo** - Prevent unnecessary re-renders
-- **useCallback** - Memoize event handlers
-- **useMemo** - Cache expensive calculations
-- **Lazy Loading** - Load components on demand
+- **React.memo**: Prevents unnecessary component re-renders
+- **useCallback**: Memoizes event handlers and functions
+- **useMemo**: Caches expensive calculations and derived values
+- **Lazy Loading**: Dynamic imports for large note components
 
-### State Management
+### State Management Efficiency
 
-- **Selective Updates** - Only update changed data
-- **Operation Batching** - Group related state changes
-- **Cleanup Jobs** - Remove old operations automatically
-- **Local Storage** - Efficient serialization
+- **Selective Updates**: Only updates changed data in Zustand store
+- **Operation Batching**: Groups related state changes together
+- **Cleanup Automation**: Removes old operations and conflicts automatically
+- **Local Storage**: Efficient serialization and persistence
 
-### UI Performance
+### UI Performance Features
 
-- **Virtualization** - For large note lists (future enhancement)
-- **Debouncing** - Search and auto-save inputs
-- **Efficient Re-renders** - Optimized selector functions
-- **Image Optimization** - SVG logos and icons
+- **Virtualization Ready**: Architecture supports future list virtualization
+- **Debounced Search**: Search input optimization for large datasets
+- **Efficient Re-renders**: Optimized selectors prevent cascading updates
+- **Image Optimization**: Uses SVG icons and optimized assets
 
-## 🔮 Future Enhancements
+## 🔮 Architecture for Future Enhancements
 
-### Collaboration Features
+### Backend Integration Ready
 
-- **Real WebSocket Integration** - True real-time collaboration
-- **User Presence** - Live cursor positions and selections
-- **Comment System** - Threaded discussions on notes
-- **Permission Management** - Read/write access controls
+The current architecture is designed for easy backend integration:
 
-### Editor Improvements
+- **API Layer**: Service layer prepared for REST/GraphQL APIs
+- **React Query**: Already configured for server state management
+- **Type Safety**: Complete TypeScript interfaces for network requests
+- **Error Handling**: Robust error boundaries and fallback states
 
-- **WYSIWYG Editor** - Rich text with visual formatting
-- **Markdown Support** - Native markdown rendering
-- **File Attachments** - Images and document uploads
-- **Version History** - Visual diff and restore capability
+### Planned Enhancements
 
-### Advanced Features
+**Real Collaboration:**
 
-- **Cloud Sync** - Backend integration with databases
-- **Offline Support** - Progressive Web App capabilities
-- **Export Options** - PDF, Markdown, HTML exports
-- **Template System** - Pre-built note templates
+- WebSocket integration for live collaboration
+- Operational transformation for conflict-free editing
+- Real-time cursor positions and user presence
+- Live commenting and annotation system
+
+**Advanced Editor Features:**
+
+- Block-based editing with drag-and-drop
+- Media uploads and attachment support
+- Table editing and advanced formatting
+- Markdown import/export functionality
+
+**Enterprise Features:**
+
+- User authentication and authorization
+- Team workspace management
+- Permission-based access controls
+- Advanced analytics and insights
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### Development Workflow
 
-### Development Guidelines
+1. **Fork and Clone**: Create your own fork of the repository
+2. **Create Branch**: Use descriptive branch names (`feature/new-editor-feature`)
+3. **Development**: Follow TypeScript strict mode and ESLint rules
+4. **Testing**: Add tests for new features and maintain coverage
+5. **Documentation**: Update README for significant changes
+6. **Pull Request**: Create detailed PR with description and screenshots
 
-- Follow TypeScript strict mode
-- Write tests for new components
-- Use semantic commit messages
-- Follow the existing code style
-- Update documentation for new features
+### Coding Standards
+
+- **TypeScript**: Use strict mode, avoid `any` types
+- **React**: Functional components with proper hook usage
+- **Styling**: TailwindCSS + Material-UI, no custom CSS files
+- **Testing**: Jest/Vitest with React Testing Library
+- **Git**: Conventional commit messages, atomic commits
+
+### Project Structure Guidelines
+
+- **Components**: Single responsibility, reusable, properly typed
+- **Hooks**: Custom hooks for shared logic extraction
+- **Stores**: Zustand slices for feature-specific state
+- **Types**: Comprehensive TypeScript interfaces and enums
+- **Utils**: Pure functions with unit tests
+
+## Additional recommendations
+
+- Use react-window or react-virtualize for large-lists (100+ notes)
 
 ## 🙏 Acknowledgments
 
-- **Material-UI** - For the excellent component library
-- **Zustand** - For lightweight state management
-- **Vite** - For the fast development experience
-- **React Testing Library** - For reliable testing utilities
+- **Material-UI Team** - For the comprehensive design system and components
+- **Zustand** - For the lightweight and powerful state management solution
+- **Tiptap** - For the extensible and feature-rich rich text editor
+- **Vite Team** - For the incredible development experience and build performance
+- **React Team** - For the robust foundation and continuous innovation
 
 ---
+
+**Built with ❤️ for collaborative productivity and seamless note-taking experiences.**
