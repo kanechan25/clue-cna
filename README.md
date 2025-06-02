@@ -227,7 +227,7 @@ src/
 - **Local Persistence** - Efficient localStorage integration
 - **Conflict Batching** - Groups related operations together
 
-### **Advanced Features**
+### **Advanced Enhancement**
 
-- React-window or React-virtualize for 100+ Note list
+- In the future: React-window or React-virtualize for 100+ Note list
 
