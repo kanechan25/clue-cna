@@ -10,9 +10,9 @@ const CreateNoteModal = React.memo<{
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
 
-  const handleContentChange = useCallback((html: string) => {
+  const handleContentChange = (html: string) => {
     setContent(html)
-  }, [])
+  }
 
   const handleSubmit = useCallback(() => {
     if (title.trim()) {

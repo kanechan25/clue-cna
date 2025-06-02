@@ -21,7 +21,7 @@ import {
 } from '@mui/icons-material'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import RenderNote from './common/RenderNote'
+import RenderContent from './common/RenderContent'
 import { truncateHtmlContent, MAX_PREVIEW_LENGTH } from '@/utils/truncate'
 import { NoteCardProps } from '@/models/types'
 
@@ -168,7 +168,7 @@ const NoteCard = React.memo<NoteCardProps>(({ note, onEdit, onDelete, onShare, u
         </Box>
 
         {isHtmlContent ? (
-          <RenderNote previewContent={previewContent} />
+          <RenderContent previewContent={previewContent} />
         ) : (
           <Typography variant='body2' color='text.secondary' sx={previewTextStyles}>
             {previewContent}

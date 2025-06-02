@@ -31,9 +31,9 @@ const CollaborativeEditor = React.memo<{
     return () => clearTimeout(timer)
   }, [content, note.content, onContentChange])
 
-  const handleContentChange = useCallback((html: string) => {
+  const handleContentChange = (html: string) => {
     setContent(html)
-  }, [])
+  }
 
   // creates multiple rapid edits to trigger conflicts
   const simulateCollaboratorEdit = useCallback(() => {

@@ -12,14 +12,7 @@ import {
   Undo,
   Redo,
 } from '@mui/icons-material'
-
-interface TiptapEditorProps {
-  content?: string
-  onUpdate?: (html: string) => void
-  placeholder?: string
-  editable?: boolean
-  minHeight?: number
-}
+import { TiptapEditorProps } from '@/models/types'
 
 const TiptapEditor: React.FC<TiptapEditorProps> = React.memo(
   ({ content = '', onUpdate, placeholder = 'Start typing...', editable = true, minHeight = 200 }) => {

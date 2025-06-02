@@ -3,7 +3,7 @@ import { Box, Typography, Button, Paper, Dialog, DialogTitle, DialogContent, Dia
 import { Warning as WarningIcon, Person as PersonIcon } from '@mui/icons-material'
 import dayjs from 'dayjs'
 import { useNotesStore } from '@/provider/notesProvider'
-import RenderNote from './RenderNote'
+import RenderContent from './RenderContent'
 import { Conflict } from '@/models/notes'
 import { getLatestOperationId } from '@/utils'
 
@@ -79,7 +79,7 @@ const ConflictModal = React.memo<{
                         borderColor: 'grey.300',
                       }}
                     >
-                      <RenderNote previewContent={operation?.content} />
+                      <RenderContent previewContent={operation?.content} />
                     </Box>
                     <Button
                       size='small'

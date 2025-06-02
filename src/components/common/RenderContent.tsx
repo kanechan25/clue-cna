@@ -1,6 +1,6 @@
 import { Box } from '@mui/material'
 
-const RenderNote = ({ previewContent }: { previewContent: string }) => {
+const RenderContent = ({ previewContent }: { previewContent: string }) => {
   return (
     <Box
       sx={{
@@ -63,4 +63,4 @@ const RenderNote = ({ previewContent }: { previewContent: string }) => {
   )
 }
 
-export default RenderNote
+export default RenderContent

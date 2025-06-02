@@ -19,3 +19,11 @@ export interface NoteCardProps {
   onShare: (id: string) => void
   users: Array<{ id: string; name: string; color: string }>
 }
+
+export interface TiptapEditorProps {
+  content?: string
+  onUpdate?: (html: string) => void
+  placeholder?: string
+  editable?: boolean
+  minHeight?: number
+}
