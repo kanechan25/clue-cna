@@ -35,13 +35,11 @@ export const NoteEditorPage: React.FC = () => {
   const navigate = useNavigate()
   const { noteId } = useParams<{ noteId: string }>()
 
-  // State
   const [title, setTitle] = useState('')
   const [collaboratorMenuAnchor, setCollaboratorMenuAnchor] = useState<null | HTMLElement>(null)
   const [showConflicts, setShowConflicts] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved')
 
-  // Store selectors - Fixed to prevent infinite loops
   const notes = useNotesStore((state) => state.notes)
   const storedCurrentNote = useNotesStore((state) => state.currentNote)
   const users = useNotesStore((state) => state.users)
@@ -49,7 +47,6 @@ export const NoteEditorPage: React.FC = () => {
   const allConflicts = useNotesStore((state) => state.conflicts)
   const isLoaded = useNotesStore((state) => state.isLoaded)
 
-  // Memoized derived values
   const currentNote = useMemo(() => {
     return notes.find((note) => note.id === noteId) || storedCurrentNote
   }, [notes, noteId, storedCurrentNote])
@@ -58,7 +55,6 @@ export const NoteEditorPage: React.FC = () => {
     return allConflicts.filter((c) => c.noteId === noteId && !c.resolvedAt)
   }, [allConflicts, noteId])
 
-  // Store actions
   const updateNote = useNotesStore((state) => state.updateNote)
   const addCollaborator = useNotesStore((state) => state.addCollaborator)
   const removeCollaborator = useNotesStore((state) => state.removeCollaborator)
@@ -66,52 +62,41 @@ export const NoteEditorPage: React.FC = () => {
   const addEditOperation = useNotesStore((state) => state.addEditOperation)
   const setCurrentNote = useNotesStore((state) => state.setCurrentNote)
 
-  // Initialize note data - wait for store to be loaded
   useEffect(() => {
     if (!isLoaded || !noteId) return // Wait for data to be loaded
-
-    // First, try to find the note in the store
     const foundNote = notes.find((note) => note.id === noteId)
-
     if (foundNote) {
-      // Set the current note if found
       if (!currentNote || currentNote.id !== noteId) {
         setCurrentNote(foundNote)
       }
       setTitle(foundNote.title)
     } else {
-      // If note not found, redirect to home
       navigate('/')
     }
   }, [isLoaded, noteId, notes, currentNote, setCurrentNote, navigate])
 
-  // Update title when currentNote changes
   useEffect(() => {
     if (currentNote) {
       setTitle(currentNote.title)
     }
   }, [currentNote])
 
-  // Handle conflicts
   useEffect(() => {
     if (conflicts.length > 0) {
       setShowConflicts(true)
     }
   }, [conflicts])
 
-  // Get collaborators for current note
   const collaborators = useMemo(() => {
     if (!currentNote) return []
     return users.filter((user) => currentNote.collaborators.includes(user.id) && user.id !== currentUser?.id)
   }, [currentNote, users, currentUser])
 
-  // Available users to add as collaborators
   const availableCollaborators = useMemo(() => {
     if (!currentNote) return []
     return users.filter((user) => !currentNote.collaborators.includes(user.id))
   }, [currentNote, users])
 
-  // Handlers
   const handleTitleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const newTitle = event.target.value
@@ -127,10 +112,7 @@ export const NoteEditorPage: React.FC = () => {
   const handleContentChange = useCallback(
     (content: string) => {
       if (!currentNote) return
-
       setSaveStatus('saving')
-
-      // Add edit operation for tracking
       addEditOperation({
         noteId: currentNote.id,
         userId: currentUser?.id || 'anonymous',
@@ -140,9 +122,7 @@ export const NoteEditorPage: React.FC = () => {
         version: currentNote.version,
       })
 
-      // Update note
       updateNote(currentNote.id, { content })
-
       setSaveStatus('saved')
     },
     [currentNote, currentUser, addEditOperation, updateNote],
@@ -178,21 +158,18 @@ export const NoteEditorPage: React.FC = () => {
       const selectedOperation = conflict.operations.find((op) => op.id === selectedOperationId)
 
       if (selectedOperation) {
-        // Remove all conflicting edits from the note content and keep only the selected one
         let newContent = currentNote.content
 
         // Remove all conflicting edit comments
         conflict.operations.forEach(() => {
-          // Extract the edit comment pattern and remove it
           const editCommentRegex = new RegExp(`<p><em>\\[.*?edited this note at.*?\\]:.*?</em></p>`, 'g')
           newContent = newContent.replace(editCommentRegex, '')
         })
-        // Add back only the selected edit
+        // Then add only selected edit
         newContent = newContent + cleanEditorContent(selectedOperation.content)
-        // Update the note with the resolved content
+        // Update the note with resolved content
         updateNote(currentNote.id, { content: newContent })
       }
-
       resolveConflict(conflictId, resolution as ConflictResolution)
     },
     [conflicts, currentNote, updateNote, resolveConflict],
@@ -247,7 +224,6 @@ export const NoteEditorPage: React.FC = () => {
           />
 
           <Box display='flex' alignItems='center' gap={1}>
-            {/* Save Status */}
             <Chip
               size='small'
               label={saveStatus === 'saved' ? 'auto saved' : saveStatus}
@@ -255,7 +231,6 @@ export const NoteEditorPage: React.FC = () => {
               variant='outlined'
             />
 
-            {/* Collaborators */}
             <Tooltip title='Manage collaborators'>
               <IconButton onClick={(e) => setCollaboratorMenuAnchor(e.currentTarget)}>
                 <PeopleIcon />
@@ -271,7 +246,6 @@ export const NoteEditorPage: React.FC = () => {
               </Tooltip>
             )}
 
-            {/* Version info */}
             <Tooltip title={`Version ${currentNote.version} • Updated ${dayjs(currentNote.updatedAt).fromNow()}`}>
               <IconButton>
                 <HistoryIcon />
@@ -327,7 +301,6 @@ export const NoteEditorPage: React.FC = () => {
         )}
       </Menu>
 
-      {/* Conflict Resolution Dialog */}
       <ConflictModal
         open={showConflicts}
         conflicts={conflicts}

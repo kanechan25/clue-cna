@@ -10,16 +10,6 @@ import NoteCard from '@/components/NoteCard'
 import CreateNoteModal from '@/components/common/CreateNoteModal'
 import Header from '@/components/common/Header'
 
-const GRID_STYLES = {
-  display: 'grid',
-  gridTemplateColumns: {
-    xs: '1fr',
-    sm: 'repeat(2, 1fr)',
-    md: 'repeat(3, 1fr)',
-  },
-  gap: 3,
-}
-
 export const Home: React.FC = () => {
   const navigate = useNavigate()
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
@@ -200,4 +190,14 @@ export const Home: React.FC = () => {
       </Container>
     </div>
   )
+}
+
+const GRID_STYLES = {
+  display: 'grid',
+  gridTemplateColumns: {
+    xs: '1fr',
+    sm: 'repeat(2, 1fr)',
+    md: 'repeat(3, 1fr)',
+  },
+  gap: 3,
 }

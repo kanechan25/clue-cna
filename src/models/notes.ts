@@ -7,7 +7,6 @@ export interface Note {
   lastEditedBy: string
   collaborators: string[]
   isDeleted: boolean
-  isLargeNote: boolean
   version: number
 }
 
