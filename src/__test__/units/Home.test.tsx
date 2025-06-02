@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { screen } from '@testing-library/react'
 import { Home } from '@/pages/Home'
-import { render } from './utils'
+import { render } from '../utils'
 
 describe('Home Page', () => {
   describe('Basic Text Rendering', () => {

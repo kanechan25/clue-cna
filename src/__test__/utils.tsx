@@ -4,7 +4,6 @@ import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import { CssBaseline } from '@mui/material'
 import { NotesStoreProvider } from '@/provider/notesProvider'
-import { createNotesStore } from '@/stores/notes'
 import { NotesStore } from '@/models/notes'
 import { vi } from 'vitest'
 import { MOCK_USERS, createMockNotes } from '@/constants/mockData'
@@ -17,6 +16,20 @@ const mockTheme = createTheme({
 
 export const mockUsers = MOCK_USERS
 export const mockNotes = createMockNotes()
+
+const mockToastHoisted = vi.hoisted(() => ({
+  success: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
+  warning: vi.fn(),
+}))
+
+vi.mock('react-toastify', () => ({
+  toast: mockToastHoisted,
+  ToastContainer: ({ children }: { children: React.ReactNode }) => <div data-testid='toast-container'>{children}</div>,
+}))
+
+export const mockToast = mockToastHoisted
 
 const MockThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
@@ -65,8 +78,6 @@ const customRender = (
     ...storeInitialState,
   }
 
-  const mockStore = createNotesStore(defaultState)
-
   const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     let wrappedChildren = children
 
@@ -83,21 +94,9 @@ const customRender = (
 
   return {
     ...render(ui, { wrapper: AllTheProviders, ...renderOptions }),
-    mockStore,
+    mockStore: defaultState,
   }
 }
-
-export const mockToast = {
-  success: vi.fn(),
-  error: vi.fn(),
-  info: vi.fn(),
-  warning: vi.fn(),
-}
-
-vi.mock('react-toastify', () => ({
-  toast: mockToast,
-  ToastContainer: ({ children }: { children: React.ReactNode }) => <div data-testid='toast-container'>{children}</div>,
-}))
 
 export * from '@testing-library/react'
 export { customRender as render }

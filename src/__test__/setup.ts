@@ -37,7 +37,6 @@ Object.defineProperty(window, 'location', {
   writable: true,
 })
 
-// Mock localStorage
 const localStorageMock = {
   getItem: vi.fn(),
   setItem: vi.fn(),

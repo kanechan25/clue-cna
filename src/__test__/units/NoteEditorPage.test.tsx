@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { screen } from '@testing-library/react'
 import { NoteEditorPage } from '@/pages/NoteEditorPage'
-import { render } from './utils'
+import { render } from '../utils'
 
 // Mock react-router-dom
 vi.mock('react-router-dom', async () => {
