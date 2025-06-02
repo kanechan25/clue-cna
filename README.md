@@ -148,7 +148,6 @@ src/
 
 **Developer Experience:**
 
-- **React Query** - Ready for server state management
 - **dayjs** - Modern date manipulation
 - **React Router** - Navigation and routing
 
@@ -176,18 +175,6 @@ src/
 - **Search Functionality** - Real-time filtering and query handling
 
 ### **Testing Strategy**
-
-```typescript
-src/__test__/
-├── integrations/    # End-to-end user workflows
-│   └── NoteCreationFlow.test.tsx
-├── units/          # Isolated component testing
-│   ├── Home.test.tsx
-│   └── NoteEditorPage.test.tsx
-├── utils.tsx       # Shared testing utilities
-└── setup.ts        # Global test configuration
-```
-
 **Key Testing Features:**
 
 - **Mock Store Provider** for isolated state testing
@@ -240,47 +227,7 @@ src/__test__/
 - **Local Persistence** - Efficient localStorage integration
 - **Conflict Batching** - Groups related operations together
 
-## 🔮 Future Enhancements
-
-### **Real-time Collaboration**
-
-- WebSocket integration for live editing
-- Operational transformation for conflict-free collaboration
-- Real-time cursor positions and user presence
-- Live commenting and annotation system
-
 ### **Advanced Features**
 
-- Backend API integration with React Query
-- User authentication and team workspaces
-- Advanced editor features (tables, media uploads)
-- Export functionality (Markdown, PDF)
+- React-window or React-virtualize for 100+ Note list
 
-## 🤝 Contributing
-
-### **Development Workflow**
-
-1. **Fork & Clone**: Create your own repository fork
-2. **Install Dependencies**: `pnpm install`
-3. **Create Branch**: Use descriptive names (`feature/new-editor-feature`)
-4. **Run Tests**: Ensure all 25 tests pass with `pnpm test`
-5. **Code Quality**: Run `pnpm lint` and `pnpm format`
-6. **Pull Request**: Submit with detailed description
-
-### **Coding Standards**
-
-- **TypeScript**: Strict mode, comprehensive type safety
-- **React**: Functional components with proper hook usage
-- **Testing**: Maintain test coverage for new features
-- **Styling**: Material-UI + TailwindCSS, no custom CSS
-- **Git**: Conventional commits, atomic changes
-
-## 📈 Project Status
-
-- ✅ **Core Features**: Complete with rich text editing
-- ✅ **Collaboration**: Advanced simulation with conflict resolution
-- ✅ **Testing**: Comprehensive coverage (25 tests passing)
-- ✅ **Performance**: Optimized for production use
-- ✅ **Documentation**: Complete setup and usage guides
-- 🔄 **Backend Integration**: Ready for API implementation
-- 🔄 **Real-time Features**: Architecture prepared for WebSockets
